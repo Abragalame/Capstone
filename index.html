@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MCPI Canteen – Classroom Delivery Demo</title><link rel="icon" href="logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#123B72;--blue:#2878D0;--light:#DCEBFA;--pale:#EEF5FD;--line:#cfe0f3;--text:#1b2a41;--green:#1f9d62}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:Figtree,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--text);background:#c9dcf3}
+a{color:var(--blue)}h1,h2,h3{color:var(--navy);margin:.2em 0}h3{font-size:17px}
+.phone{max-width:480px;margin:auto;min-height:100vh;background:var(--pale);position:relative;box-shadow:0 0 40px #123b7233}
+.nv{background:var(--navy);color:#fff}.nv h1,.nv h2{color:#fff}
+.top{position:sticky;top:0;z-index:5;background:#fff;display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--line)}
+.top .b{display:flex;align-items:center;gap:8px;font-weight:800;color:var(--navy);text-decoration:none;font-size:19px;flex:1}.top img{width:36px;height:36px}
+.ib{width:44px;height:44px;border-radius:12px;background:var(--light);color:var(--navy);display:grid;place-items:center;position:relative;border:0;cursor:pointer;text-decoration:none;flex:none}
+.bd{position:absolute;top:-6px;right:-6px;background:var(--navy);color:#fff;border-radius:10px;font-size:11px;min-width:18px;height:18px;display:grid;place-items:center;padding:0 4px}
+.pad{padding:16px 16px 160px}.t{font-size:26px;margin:0}.hd{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.bn{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:#fff;border-top:1px solid var(--line);display:flex;z-index:9;padding-bottom:env(safe-area-inset-bottom)}
+.bn a{flex:1;padding:10px 0 8px;color:#6b7d96;text-decoration:none;font-size:12px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:2px;position:relative}
+.bn a.on{color:var(--navy)}.bn a.on:before{content:"";position:absolute;top:0;width:28px;height:4px;border-radius:0 0 4px 4px;background:var(--blue)}
+.dn{display:none}
+.fl{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);width:calc(100% - 24px);max-width:456px;background:var(--navy);color:#fff;border-radius:18px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;z-index:8}
+.btn{background:var(--blue);color:#fff;border:0;border-radius:14px;padding:14px;font:700 16px Figtree,sans-serif;width:100%;cursor:pointer;display:flex;gap:8px;align-items:center;justify-content:center;text-decoration:none;margin:8px 0}
+.btn:hover{filter:brightness(1.08)}.btn.w{background:#fff;color:var(--navy)}.btn.o{background:transparent;border:2px solid #ffffff88;color:#fff}.btn.ol{background:#fff;border:2px solid var(--line);color:var(--navy)}.btn.g{background:var(--green)}.btn:disabled{background:#d5dde8;color:#7b8aa0;cursor:not-allowed}.btn.sm{width:auto;padding:9px 14px;font-size:14px;margin:0}
+.c{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:14px;box-shadow:0 2px 8px #123b7210}.c.lt{background:var(--light)}.c.nv{background:var(--navy);border-color:var(--navy);color:#fff}
+.g2{display:grid;grid-template-columns:repeat(auto-fill,minmax(135px,1fr));gap:12px}.gx{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.fc{background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden;position:relative}
+.fi{background:var(--light);height:112px;display:grid;place-items:center;cursor:pointer}.fi span{width:72px;height:72px;border-radius:50%;background:#fff;display:grid;place-items:center;font-size:38px}
+.fb{padding:10px}.fb>b{display:block;color:var(--navy)}
+.pl{font-size:11px;border-radius:10px;padding:2px 8px;font-weight:700;background:#dff5e8;color:#157a49;white-space:nowrap}.pl.f{background:#fff0cc;color:#8a5a00}.pl.s{background:#e6eaf0;color:#667}.pl.b{background:var(--light);color:var(--navy)}
+.pop{position:absolute;top:8px;left:8px;background:var(--navy);color:#fff;font-size:11px;font-weight:700;border-radius:10px;padding:2px 8px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 12px}.ch{border:2px solid var(--line);background:#fff;color:var(--navy);border-radius:22px;padding:8px 18px;font:700 15px Figtree,sans-serif;cursor:pointer;white-space:nowrap}.ch.on{background:var(--navy);border-color:var(--navy);color:#fff}
+.cat{flex:none;width:92px;background:var(--light);border-radius:16px;padding:12px 6px;text-align:center;color:var(--navy);cursor:pointer;font-weight:700}.cat span{display:block;font-size:30px}.cat small{font-weight:400}
+.sr{display:flex;align-items:center;gap:10px;background:#fff;border-radius:14px;padding:0 14px;border:1px solid var(--line);color:#6b7d96}.sr input{border:0;outline:0;flex:1;padding:14px 0;font:16px Figtree,sans-serif;background:transparent}
+.in{width:100%;padding:14px;border:2px solid var(--line);border-radius:14px;font:16px Figtree,sans-serif;background:#fff}.in:focus{border-color:var(--blue);outline:0}
+label.l{display:block;font-weight:700;margin:12px 0 6px;font-size:14px}
+.q{display:flex;align-items:center;gap:12px}.q button{width:34px;height:34px;border-radius:50%;border:2px solid var(--line);background:#fff;color:var(--navy);font-size:20px;cursor:pointer}
+.rw{display:flex;justify-content:space-between;gap:10px;padding:5px 0;align-items:center}.rm{color:#c0392b;font-size:13px;text-decoration:none;display:flex;gap:4px;align-items:center}
+.sl{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.sl button{border:2px solid var(--line);background:#fff;color:var(--navy);border-radius:12px;padding:10px 4px;font:700 14px Figtree,sans-serif;cursor:pointer}.sl button.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.tk{background:#fff;border-radius:20px;overflow:hidden;border:1px solid var(--line);margin-bottom:14px}.tkh{background:var(--navy);color:#fff;padding:14px 16px;display:flex;gap:10px;align-items:center}.tkh img{width:40px;height:40px;background:#fff;border-radius:50%;padding:2px}
+.tkb{padding:16px;text-align:center}.on_{font-size:40px;font-weight:800;color:var(--navy);letter-spacing:1px}.qb{border:2px solid var(--line);border-radius:20px;padding:14px;width:230px;max-width:100%;margin:10px auto}.qb svg{width:100%;display:block}.qb.lk{background:var(--pale);border-style:dashed;color:#566;padding:22px 14px;font-size:30px}.qb.lk b{font-size:15px;color:var(--navy)}.qb.lk small{font-size:12px}.dash{border-top:2px dashed var(--line);margin:0 16px}
+.nm{width:30px;height:30px;border-radius:50%;background:var(--navy);color:#fff;display:grid;place-items:center;font-weight:700;flex:none}.nm.o{background:#f0961e}.st{display:flex;gap:12px;margin:10px 0;align-items:flex-start}
+.tl{list-style:none;padding:0;margin:10px 0}.tl li{display:flex;gap:14px;align-items:center;padding:10px 0;position:relative;color:#8696ad}.tl li:before{content:"";position:absolute;left:15px;top:38px;bottom:-12px;width:3px;background:var(--line)}.tl li:last-child:before{display:none}
+.tl i{width:32px;height:32px;border-radius:50%;background:#fff;border:3px solid var(--line);display:grid;place-items:center;font-style:normal;z-index:1;font-size:14px}.tl li.d{color:var(--navy);font-weight:700}.tl li.d i{background:var(--blue);border-color:var(--blue);color:#fff}.tl li.d:before{background:var(--blue)}
+.demo{background:#eaf3fe;border-radius:12px;padding:10px 12px;font-size:13px;color:#3d5a80;margin:12px 0}
+.ok{background:var(--green);color:#fff;border-radius:16px;padding:14px 16px;display:flex;gap:10px;align-items:center;font-size:20px;font-weight:800;margin-bottom:14px}
+.wl{min-height:100vh;background:var(--navy);color:#fff;padding:36px 22px 0;position:relative;overflow:hidden}.wl:before{content:"";position:absolute;right:-110px;top:180px;width:320px;height:320px;border-radius:50%;background:#2878d055}.wl>*{position:relative}
+.tkw{width:80%;margin:26px auto -90px;color:var(--text)}
+.logo{width:96px;height:96px;border-radius:50%;background:#fff;padding:5px;box-shadow:0 0 0 6px #ffffff33}.logo img{width:100%;height:100%}.lgl{width:84px;height:84px;background:#fff;border-radius:50%;padding:4px}
+.lg .c{margin:-40px 16px 16px;padding:20px}
+.or{display:flex;align-items:center;gap:10px;color:#6b7d96;font-size:13px;margin:6px 0}.or:before,.or:after{content:"";flex:1;border-top:1px solid var(--line)}
+.stf{display:flex;min-height:100vh}.stf aside{width:210px;padding:20px;display:flex;flex-direction:column;gap:12px;flex:none}.stf aside a{color:#cfe3fb}.stf section{flex:1;padding:20px}
+.mock{background:var(--light);border-radius:12px;padding:8px 10px;margin-top:8px;font-size:14px}.mock div{background:#fff;border-radius:8px;padding:6px 10px;margin:4px 0}
+.cols,.cols2,.gd{display:block}.rmark{font-size:13px;color:#566}
+svg text{font-family:Figtree,system-ui,sans-serif}
+@media(max-width:640px){.stf{flex-direction:column}.stf aside{width:auto}.phone{box-shadow:none}}
+@media(min-width:900px){
+ .phone{max-width:1120px}.phone.full{max-width:none;box-shadow:none}
+ .pad{padding:26px 36px 60px}.top{padding:12px 36px}.bn{display:none}
+ .dn{display:flex;gap:6px;margin-right:14px}.dn a{padding:10px 16px;border-radius:12px;color:#51647f;text-decoration:none;font-weight:700;display:flex;gap:8px;align-items:center}.dn a:hover{background:var(--pale)}.dn a.on{background:var(--light);color:var(--navy)}
+ .g2{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px}
+ .cols{display:grid;grid-template-columns:1fr 380px;gap:26px;align-items:start}
+ .cols2{display:grid;grid-template-columns:1fr 1fr;gap:26px;align-items:start}
+ .gd{display:grid;grid-template-columns:1fr 1fr;gap:0 18px}
+ .fl{bottom:24px;max-width:560px}
+ .wl{padding:40px 60px}.wi{display:grid;grid-template-columns:1fr 1fr;gap:50px;align-items:center;min-height:calc(100vh - 80px);max-width:1000px;margin:auto}.tkw{width:75%;margin:0 auto}
+ .lg{display:grid;grid-template-columns:1fr 1fr;min-height:100vh}.lg .nv{display:flex;flex-direction:column;justify-content:center;align-items:center;padding:40px}.lg .c{margin:auto;width:100%;max-width:440px}
+ .big-fi{height:340px!important}
+}
+</style></head><body><div id="app" class="phone"></div>
+<script>
+const P={home:"M3 11l9-8 9 8M5 10v10h14V10",menu:"M7 3v8M5 3v5a2 2 0 004 0V3M7 11v10M17 21V3c-2 1-3 4-3 8h3",orders:"M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6",user:"M12 12a4 4 0 100-8 4 4 0 000 8M4 21a8 8 0 0116 0",cart:"M3 4h2l2 11h10l2-8H6M9 20h.01M17 20h.01",back:"M15 5l-7 7 7 7",check:"M5 12l5 5 9-10",search:"M11 4a7 7 0 100 14 7 7 0 000-14M21 21l-5-5",bell:"M6 16V11a6 6 0 0112 0v5l2 2H4zM10 21h4",arrow:"M5 12h14M13 6l6 6-6 6",trash:"M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"};
+const I=(n,s=22)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="${P[n]}"/></svg>`;
+const MENU=[
+{id:1,n:"Chicken Rice Meal",p:65,e:"🍗",c:"Meals",s:"ok",pop:1,t:5,d:"Crispy fried chicken served with steamed rice."},
+{id:2,n:"Pork Adobo Rice",p:60,e:"🍛",c:"Meals",s:"ok",pop:1,t:5,d:"Tender pork adobo in soy-vinegar sauce with rice."},
+{id:3,n:"Tapsilog",p:75,e:"🍳",c:"Meals",s:"few",t:7,d:"Beef tapa, garlic rice and a fried egg."},
+{id:4,n:"Hotdog Rice Meal",p:50,e:"🌭",c:"Meals",s:"ok",t:4,d:"Two hotdogs with garlic rice and egg."},
+{id:5,n:"Longganisa Meal",p:55,e:"🥓",c:"Meals",s:"ok",t:6,d:"Sweet native sausage with rice and egg."},
+{id:6,n:"Pancit Canton",p:35,e:"🍜",c:"Noodles",s:"ok",t:4,d:"Stir-fried noodles with vegetables."},
+{id:7,n:"Spaghetti",p:40,e:"🍝",c:"Noodles",s:"ok",t:4,d:"Sweet-style Filipino spaghetti."},
+{id:8,n:"Instant Mami",p:30,e:"🍲",c:"Noodles",s:"ok",t:5,d:"Hot noodle soup with egg."},
+{id:9,n:"Siomai (4 pcs)",p:30,e:"🥟",c:"Snacks",s:"ok",pop:1,t:3,d:"Steamed pork siomai served with soy sauce and calamansi."},
+{id:10,n:"Turon",p:15,e:"🥠",c:"Snacks",s:"out",t:3,d:"Banana spring roll with caramel."},
+{id:11,n:"Sandwich",p:35,e:"🥪",c:"Snacks",s:"ok",t:3,d:"Egg and ham sandwich."},
+{id:12,n:"Banana Cue",p:15,e:"🍌",c:"Snacks",s:"ok",t:2,d:"Caramelized banana on a stick."},
+{id:13,n:"Burger",p:45,e:"🍔",c:"Snacks",s:"ok",t:5,d:"Beef patty burger with lettuce."},
+{id:14,n:"Orange Juice",p:20,e:"🧃",c:"Drinks",s:"ok",pop:1,t:1,d:"Chilled orange juice, 250 ml."},
+{id:15,n:"Iced Tea",p:20,e:"🧋",c:"Drinks",s:"ok",t:1,d:"Sweet iced tea."},
+{id:16,n:"Bottled Water",p:15,e:"💧",c:"Drinks",s:"ok",t:1,d:"Purified water, 500 ml."},
+{id:17,n:"Buko Juice",p:25,e:"🥥",c:"Drinks",s:"ok",t:1,d:"Fresh young coconut juice."},
+{id:18,n:"Chocolate Milk",p:25,e:"🥛",c:"Drinks",s:"ok",t:1,d:"Cold chocolate milk."}];
+const CATS=["Meals","Noodles","Snacks","Drinks"],CI={Meals:"🍛",Noodles:"🍜",Snacks:"🥟",Drinks:"🧃"};
+const STAT=["Order received","Preparing","Out for delivery","Delivered"];
+let S={user:"",grade:9,sid:"",room:"",cart:{},orders:[],count:0};
+const load=()=>{try{Object.assign(S,JSON.parse(localStorage.getItem("mcpi")||"{}"))}catch(e){}};load();
+const save=()=>{try{localStorage.setItem("mcpi",JSON.stringify(S))}catch(e){}};
+const $=id=>document.getElementById(id),A=$("app");
+const peso=n=>"₱"+n.toLocaleString();const item=id=>MENU.find(m=>m.id==id);
+const cartN=()=>Object.values(S.cart).reduce((a,b)=>a+b,0),cartT=()=>Object.entries(S.cart).reduce((a,[i,q])=>a+item(i).p*q,0);
+const cur=()=>S.orders[S.orders.length-1];
+const esc=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+let cat="All",q="",pick="ASAP (about 15 min)",note="",room=S.room||"",timer=null,lastH="",dq=1,dqId=0;
+const greet=()=>{const h=new Date().getHours();return h<12?"Good morning":h<18?"Good afternoon":"Good evening"};
+const slots=()=>{const d=new Date();d.setMinutes(Math.ceil((d.getMinutes()+10)/10)*10,0,0);return[...Array(7)].map((_,i)=>new Date(d.getTime()+i*6e5).toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"}))};
+
+function QR(text){let h=2166136261;for(const c of text){h^=c.charCodeAt(0);h=Math.imul(h,16777619)}
+ const r=()=>(h=Math.imul(h^h>>>15,2246822507)>>>0,h&1),N=25;let o=`<svg viewBox="0 0 ${N} ${N}" shape-rendering="crispEdges"><rect width="${N}" height="${N}" fill="#fff"/>`;
+ const f=(x,y)=>`<rect x="${x}" y="${y}" width="7" height="7" fill="#123B72"/><rect x="${x+1}" y="${y+1}" width="5" height="5" fill="#fff"/><rect x="${x+2}" y="${y+2}" width="3" height="3" fill="#123B72"/>`;
+ for(let y=0;y<N;y++)for(let x=0;x<N;x++){const F=(x<8&&y<8)||(x>16&&y<8)||(x<8&&y>16);if(!F&&r())o+=`<rect x="${x}" y="${y}" width="1" height="1" fill="#123B72"/>`}
+ return o+f(0,0)+f(18,0)+f(0,18)+"</svg>"}
+
+function gradeInfo(g){g=+g||9;const a="Your order is prepared at the Canteen.",z="The runner delivers it to your classroom.";
+ if(g==7)return{k:"g7",x:150,y:190,lx:160,ly:180,s:[a,"The runner takes the walkway toward the Grade 7 Building.",z]};
+ if(g<=10)return{k:"jhs",x:143,y:114,lx:100,ly:168,s:[a,"The runner walks along the walkway to the JHS Building, right beside the Canteen.",z]};
+ return{k:"shs",x:51,y:114,lx:8,ly:168,s:[a,"The runner walks along the walkway, past the JHS Building, to the SHS Building.",z]}}
+function map(g){g=+(g||S.grade)||9;const i=gradeInfo(g),bs=k=>i.k==k?'#e8452c" stroke-width="4':'#123B72" stroke-width="2';
+ return `<svg viewBox="0 0 360 310" style="width:100%;background:#e8f4e0;border-radius:14px;border:1px solid var(--line)">
+<rect x="0" y="262" width="360" height="48" fill="#cfd6df"/><text x="90" y="290" text-anchor="middle" font-size="11" fill="#456">Street</text>
+<rect x="8" y="14" width="86" height="100" rx="6" fill="#9ec3ea" stroke="${bs("shs")}"/><text x="51" y="58" text-anchor="middle" font-size="13" font-weight="700" fill="#123B72">SHS</text><text x="51" y="74" text-anchor="middle" font-size="9" fill="#123B72">Senior High</text>
+<rect x="100" y="14" width="86" height="100" rx="6" fill="#9ec3ea" stroke="${bs("jhs")}"/><text x="143" y="58" text-anchor="middle" font-size="13" font-weight="700" fill="#123B72">JHS</text><text x="143" y="74" text-anchor="middle" font-size="9" fill="#123B72">Junior High</text>
+<rect x="192" y="14" width="80" height="100" rx="6" fill="#2878D0" stroke="#123B72" stroke-width="3"/><text x="232" y="60" text-anchor="middle" font-size="22">🍽️</text><text x="232" y="82" text-anchor="middle" font-size="13" font-weight="700" fill="#fff">CANTEEN</text>
+<rect x="278" y="14" width="76" height="100" rx="6" fill="#f1d9a8" stroke="#123B72" stroke-width="2"/><text x="316" y="58" text-anchor="middle" font-size="12" font-weight="700" fill="#123B72">OPEN</text><text x="316" y="73" text-anchor="middle" font-size="12" font-weight="700" fill="#123B72">STAGE</text>
+<rect x="95" y="190" width="170" height="62" rx="6" fill="#9ec3ea" stroke="${bs("g7")}"/><text x="104" y="214" font-size="12" font-weight="700" fill="#123B72">GRADE 7 BUILDING</text><text x="104" y="230" font-size="9" fill="#123B72">Bottom floor = MAIN GATE</text>
+<rect x="216" y="244" width="32" height="18" fill="#fff" stroke="#123B72" stroke-width="2"/><text x="232" y="257" text-anchor="middle" font-size="9" font-weight="700" fill="#123B72">GATE</text>
+<path d="M232 114 L232 150 L${i.x} 150 L${i.x} ${i.y}" fill="none" stroke="#f0961e" stroke-width="4" stroke-dasharray="8 6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="232" cy="114" r="7" fill="#f0961e"/><text x="242" y="138" font-size="11" font-weight="700" fill="#a35a00">① Canteen</text>
+<circle cx="${i.x}" cy="${i.y}" r="7" fill="#f0961e"/><text x="${i.lx}" y="${i.ly}" font-size="11" font-weight="700" fill="#a35a00">② Your classroom (Gr ${g})</text></svg>`}
+const steps=g=>gradeInfo(g).s.map((t,i)=>`<div class="st"><span class="nm o">${i+1}</span><span>${t}</span></div>`).join("");
+const gradeChips=()=>`<div class="chips">${[7,8,9,10,11,12].map(g=>`<button class="ch ${g==S.grade?"on":""}" onclick="setGrade(${g})">Grade ${g}</button>`).join("")}</div>`;
+function setGrade(g){S.grade=g;save();const y=scrollY;go();scrollTo(0,y)}
+
+const hd=t=>`<div class="hd"><button class="ib" onclick="history.back()">${I("back")}</button><h1 class="t">${t}</h1></div>`;
+const empty=(i,t,l,h)=>`<div class="c" style="text-align:center"><div style="font-size:50px">${i}</div><h2>${t}</h2><a class="btn" href="${h}">${l}</a></div>`;
+const pill=m=>`<span class="pl ${m.s=="few"?"f":m.s=="out"?"s":""}">${m.s=="out"?"Sold out":m.s=="few"?"Few left":"Available"}</span>`;
+const card=m=>{const n=S.cart[m.id]||0;return `<div class="fc">${m.pop?'<span class="pop">Popular</span>':""}<div class="fi" onclick="location.hash='#/item/${m.id}'"><span>${m.e}</span></div><div class="fb"><b>${m.n}</b><div class="rw"><b>${peso(m.p)}</b>${pill(m)}</div>${m.s=="out"?'<button class="btn" disabled>Sold out</button>':n?`<button class="btn g" onclick="location.hash='#/item/${m.id}'">${I("check",18)} Added</button>`:`<button class="btn" onclick="add(${m.id})">+ Add</button>`}</div></div>`};
+const grid=()=>{const l=MENU.filter(m=>(cat=="All"||m.c==cat)&&m.n.toLowerCase().includes(q.toLowerCase()));return l.length?l.map(card).join(""):"<p>No items found.</p>"};
+const ticket=(o,qr)=>{const rdy=o.st>=2;return `<div class="tk"><div class="tkh"><img src="logo.png" alt=""><div><b>MCPI Canteen</b><br><small>Delivery ticket</small></div></div>${qr?`<div class="tkb"><small>Order number</small><div class="on_">${o.no}</div>${rdy?`<div class="qb">${QR(o.no)}</div><small>Show this QR code to the delivery runner. (Demo code)</small>`:`<div class="qb lk">🔒<br><b>QR code locked</b><br><small>It appears here once your order is out for delivery.</small></div>`}</div><div class="dash"></div>`:""}<div class="tkb" style="text-align:left">${o.items.map(x=>`<div class="rw"><span>${x.q}× ${x.n}</span><b>${peso(x.p*x.q)}</b></div>`).join("")}<div class="rw"><span>Student</span><b>${esc(o.name)} · Gr ${o.grade}</b></div><div class="rw"><span>Deliver to</span><b style="text-align:right">${esc(o.room)}</b></div><div class="rw"><span>Delivery time</span><b>${o.time}</b></div><div class="rw"><span>Total</span><b>${peso(o.total)}</b></div>${o.notes?`<small>📝 ${esc(o.notes)}</small>`:""}</div></div>`};
+
+const R={};
+R.welcome=()=>`<div class="wl"><div class="wi"><div><div class="logo"><img src="logo.png" alt="Maryknoll College seal"></div><h1 style="font-size:42px;margin:18px 0 6px;color:#fff">MCPI Canteen</h1><b>Maryknoll College of Panabo, Inc.</b><p style="font-size:20px;margin:16px 0 20px;opacity:.9">Order from your phone. We deliver to your classroom.</p><a class="btn w" href="#/login" style="width:190px">Get started ${I("arrow",18)}</a><a class="btn o" href="#/guide" style="width:190px">How it works</a><p>Canteen staff? <a href="#/staff" style="color:#fff">Open the staff dashboard</a></p></div><div class="tk tkw"><div class="tkh"><img src="logo.png" alt=""><div><b>MCPI Canteen</b><br><small>Sample delivery ticket</small></div></div><div class="tkb"><small>Order number</small><div class="on_" style="font-size:30px">SAMPLE</div><div class="qb" style="width:140px">${QR("SAMPLE")}</div><small>Sample only</small></div></div></div></div>`;
+R.login=()=>`<div class="lg"><div class="nv" style="text-align:center;padding:34px 20px 70px"><img class="lgl" src="logo.png" alt=""><h1>MCPI Canteen</h1><span>Maryknoll College of Panabo, Inc.</span><p style="opacity:.85;margin-bottom:0">Classroom delivery ordering</p></div><div class="c"><h2>Log in</h2><p style="margin:4px 0;color:#566">Enter your name. We will put it on your orders.</p><label class="l">Your name</label><input class="in" id="nm" placeholder="e.g. Juan Dela Cruz" onkeydown="if(event.key=='Enter')login()"><label class="l">What grade are you in?</label><select class="in" id="gr">${[7,8,9,10,11,12].map(g=>`<option value="${g}" ${g==S.grade?"selected":""}>Grade ${g}</option>`).join("")}</select><label class="l">Classroom / room (where we deliver)</label><input class="in" id="rm" value="${esc(S.room)}" placeholder="e.g. Grade 9 – Rizal, Room 204"><label class="l">Student ID (optional)</label><input class="in" id="sid" placeholder="e.g. 2024-0001"><button class="btn" style="margin-top:18px" onclick="login()">Log in</button><div class="or">or</div><button class="btn ol" onclick="login(1)">Continue as demo student</button><div class="demo">ℹ️ This is a demo. There is no password and no payment. Nothing leaves your device.</div><p style="text-align:center;margin:0"><a href="#/">Back</a> · <a href="#/guide">How it works</a></p></div></div>`;
+R.home=()=>`<div class="nv c" style="border-radius:24px;padding:22px"><h1 style="margin:0;font-size:26px">${greet()}, ${esc(S.user.split(" ")[0])}!</h1><p style="margin:4px 0 14px;opacity:.85">What are you having today? We deliver to ${esc(S.room||"your classroom")}.</p><div class="sr"><span>${I("search",20)}</span><input placeholder="Search food or drinks" onkeydown="if(event.key=='Enter'){q=this.value;cat='All';location.hash='#/menu'}"></div><a class="btn w" style="margin-top:12px" href="#/menu">Pre-order now ${I("arrow",18)}</a></div>
+<h2>Categories</h2><div class="chips" style="gap:10px">${CATS.map(c=>`<div class="cat" onclick="cat='${c}';q='';location.hash='#/menu'"><span>${CI[c]}</span>${c}<br><small>${MENU.filter(m=>m.c==c).length} items</small></div>`).join("")}</div>
+<div class="rw"><h2>Popular meals</h2><a href="#/menu" onclick="cat='All';q=''">See full menu</a></div><div class="g2">${MENU.filter(m=>m.pop).map(card).join("")}</div>`;
+R.menu=()=>`<h1 class="t" style="margin-bottom:12px">Menu</h1><div class="sr"><span>${I("search",20)}</span><input value="${esc(q)}" placeholder="Search the menu" oninput="q=this.value;$('mg').innerHTML=grid()"></div><div class="chips" style="margin-top:12px">${["All",...CATS].map(c=>`<button class="ch ${c==cat?"on":""}" onclick="cat='${c}';go()">${c}</button>`).join("")}</div><div class="g2" id="mg">${grid()}</div>`;
+R.item=id=>{const m=item(id);if(!m)return R.menu();if(dqId!=id){dqId=id;dq=S.cart[id]||1}
+ return hd("Food details")+`<div class="cols2"><div class="fi big-fi" style="height:230px;border-radius:24px;cursor:default"><span style="width:150px;height:150px;font-size:84px">${m.e}</span></div><div><h1 class="t" style="margin-top:6px">${m.n}</h1><div class="rw" style="justify-content:flex-start;gap:10px"><b style="font-size:24px;color:var(--navy)">${peso(m.p)}</b>${pill(m)}<span>⏱ about ${m.t} min</span></div><p>${m.d}</p><div class="c lt"><div class="rw"><b>Quantity</b><div class="q"><button onclick="dq=Math.max(1,dq-1);go()">−</button><b>${dq}</b><button onclick="dq=Math.min(20,dq+1);go()">+</button></div></div></div>${m.s=="out"?'<button class="btn" disabled>Sold out</button>':`<button class="btn" onclick="S.cart[${m.id}]=dq;dqId=0;save();location.hash='#/menu'">${I("cart",20)} ${S.cart[id]?"Update cart":"Add to cart"} · ${peso(m.p*dq)}</button>`}</div></div>`};
+R.cart=()=>{const ids=Object.keys(S.cart);if(!ids.length)return hd("Your cart")+empty("🛒","Your cart is empty","Browse the menu","#/menu");
+ return hd("Your cart")+`<div class="cols"><div>`+ids.map(i=>{const m=item(i),n=S.cart[i];return `<div class="c" style="display:flex;gap:12px;padding:10px"><div class="fi" style="width:72px;height:72px;border-radius:14px;flex:none;cursor:default"><span style="width:50px;height:50px;font-size:28px">${m.e}</span></div><div style="flex:1"><div class="rw" style="padding:0"><b>${m.n}</b><b>${peso(m.p*n)}</b></div><small>${peso(m.p)} each</small><div class="rw"><a class="rm" href="#" onclick="chg(${i},-${n});return false">${I("trash",15)} Remove</a><div class="q"><button onclick="chg(${i},-1)">−</button><b>${n}</b><button onclick="chg(${i},1)">+</button></div></div></div></div>`}).join("")+`<a class="btn ol" href="#/menu">+ Add more food</a></div><div class="c lt"><h3>Order summary</h3><div class="rw"><span>Items (${cartN()})</span><span>${peso(cartT())}</span></div><div class="rw"><span>Service fee</span><span>₱0</span></div><div class="dash" style="margin:6px 0"></div><div class="rw"><b>Total</b><b style="font-size:24px;color:var(--navy)">${peso(cartT())}</b></div><a class="btn" href="#/checkout">Proceed to checkout ${I("arrow",18)}</a></div></div>`};
+R.checkout=()=>{if(!cartN())return R.cart();const L=["ASAP (about 15 min)",...slots()];
+ return hd("Pre-order checkout")+`<div class="cols"><div><div class="c"><h3>1 · Your order</h3>${Object.entries(S.cart).map(([i,n])=>`<div class="rw"><span>${n}× ${item(i).n}</span><b>${peso(item(i).p*n)}</b></div>`).join("")}</div><div class="c"><h3>2 · Student</h3><div class="rw"><span>Name</span><b>${esc(S.user)}</b></div><div class="rw"><span>Grade</span><b>${S.grade}</b></div><div class="rw"><span>Student ID</span><b>${esc(S.sid||"—")}</b></div></div><div class="c"><h3>3 · Deliver to (classroom)</h3><input class="in" value="${esc(room)}" placeholder="e.g. Grade 9 – Rizal, Room 204" oninput="room=this.value"><small class="rmark">Students stay in class. Canteen staff bring your order to this room.</small></div><div class="c"><h3>4 · Delivery time</h3><div class="sl">${L.map(t=>`<button class="${t==pick?"on":""}" onclick="pick=this.textContent;go()">${t}</button>`).join("")}</div></div><div class="c"><h3>5 · Notes (optional)</h3><textarea class="in" rows="2" placeholder="e.g. No chili please" oninput="note=this.value">${esc(note)}</textarea></div></div><div><div class="c lt"><div class="rw"><b>Total</b><b style="font-size:22px;color:var(--navy)">${peso(cartT())}</b></div><small>Pay the runner when your food arrives.</small></div><div class="demo">🧪 Demonstration only. No payment is collected.</div><button class="btn" onclick="place()">Place pre-order</button></div></div>`};
+R.done=()=>{const o=cur();if(!o)return R.home();return `<div class="cols2"><div class="c lt" style="text-align:center"><div style="width:84px;height:84px;border-radius:50%;background:var(--blue);color:#fff;display:grid;place-items:center;margin:0 auto 10px">${I("check",48)}</div><h1 class="t">Order Placed Successfully!</h1><p>Your order number is</p><div class="on_">${o.no}</div><p>Delivering to <b>${esc(o.room)}</b></p><a class="btn" href="#/track">Track My Order</a></div><div>${ticket(o,false)}</div></div>`};
+R.track=()=>{const o=cur();if(!o)return hd("Track order")+empty("📋","No active order","Start an order","#/menu");
+ return hd("Track order")+`<div class="cols2"><div class="c"><div class="rw"><b style="font-size:20px;color:var(--navy)">${o.no}</b><span class="pl b">Delivery ${o.time}</span></div><p style="margin:2px 0">📍 Deliver to: <b>${esc(o.room)}</b></p><ul class="tl">${STAT.map((s,i)=>`<li class="${i<=o.st?"d":""}"><i>${i<=o.st?"✓":i+1}</i>${s}</li>`).join("")}</ul>${o.st<2?`<button class="btn ol" onclick="adv()">⏩ Demo: skip ahead</button><small>This demo updates automatically every few seconds. Staff can also update it from the staff dashboard.</small>`:""}${o.st==2?`<a class="btn g" href="#/delivery">🛵 On its way! Show delivery QR</a>`:""}${o.st==3?`<a class="btn" href="#/menu">Order again</a>`:""}</div><div>${ticket(o,true)}</div></div>`};
+R.delivery=()=>{const o=cur();if(!o)return R.track();if(o.st<2)return hd("Delivery")+`<div class="c" style="text-align:center"><h2>Not out for delivery yet</h2><p>Your order is still being prepared. Your QR code appears when it is on its way.</p><a class="btn" href="#/track">Back to tracking</a></div>`;
+ return `<div class="ok">${I("bell",28)} ${o.st==3?"Order delivered!":"Your order is on its way!"}</div><div class="cols2"><div>${ticket(o,true)}${o.st==2?`<button class="btn" onclick="done()">${I("check",18)} Confirm received</button><p style="text-align:center;margin-top:0"><small class="rmark">Tap this after the food arrives in your classroom.</small></p>`:`<a class="btn" href="#/menu">Order again</a>`}</div><div><div class="c"><h3>How delivery works</h3><div class="st"><span class="nm">1</span><span>Stay in your classroom. <b>No need to go to the canteen.</b></span></div><div class="st"><span class="nm">2</span><span>A runner brings your order to <b>${esc(o.room)}</b>.</span></div><div class="st"><span class="nm">3</span><span>Show the <b>QR code</b> to the runner.</span></div><div class="st"><span class="nm">4</span><span>Tap <b>Confirm received</b> once you have your food.</span></div></div><div class="c"><h3>📍 Delivery route</h3>${map(o.grade)}${steps(o.grade)}</div></div></div>`};
+R.orders=()=>hd("My orders")+(S.orders.length?S.orders.slice().reverse().map((o,i)=>`<div class="c"><div class="rw"><b>${o.no}</b><span class="pl ${o.st==3?"s":o.st==2?"":"b"}">${STAT[o.st]}</span></div><small>${o.items.map(x=>x.q+"× "+x.n).join(", ")}</small><div class="rw"><span>📍 ${esc(o.room)} · ${o.time}</span><b>${peso(o.total)}</b></div>${i==0&&o.st<3?`<a class="btn sm" href="#/${o.st==2?"delivery":"track"}">${o.st==2?"View delivery QR":"Track order"}</a>`:""}</div>`).join(""):empty("🧾","No orders yet","Order now","#/menu"));
+R.profile=()=>`<div class="cols2"><div class="c" style="text-align:center"><div style="width:84px;height:84px;border-radius:50%;background:var(--light);color:var(--navy);display:grid;place-items:center;margin:0 auto 8px">${I("user",44)}</div><h2>${esc(S.user)}</h2><p style="margin:0">Grade ${S.grade}${S.sid?" · ID "+esc(S.sid):""}</p><p style="margin:4px 0">📍 ${esc(S.room||"No classroom set")}</p></div><div class="c"><a class="btn ol" href="#/orders">🧾 Order history (${S.orders.length})</a><a class="btn ol" href="#/guide">❓ How it works</a><button class="btn ol" onclick="alert('Demo only: feedback is not sent anywhere.')">💬 Help or feedback</button><a class="btn ol" href="#/staff">👩‍🍳 Staff dashboard (demo)</a><button class="btn ol" onclick="resetDemo()">♻️ Reset demo orders</button><button class="btn" style="background:#c0392b" onclick="logout()">Log out</button></div></div>`;
+R.staff=()=>{const L=S.orders.slice().reverse(),n=k=>S.orders.filter(o=>o.st==k).length;
+ return `<div class="stf"><aside class="nv"><div style="display:flex;gap:10px;align-items:center"><img class="lgl" style="width:44px;height:44px" src="logo.png" alt=""><b>Canteen Staff</b></div><span>🆕 Received: ${n(0)}</span><span>👩‍🍳 Preparing: ${n(1)}</span><span>🛵 Out for delivery: ${n(2)}</span><span>✅ Delivered: ${n(3)}</span><a href="#/${S.user?"home":""}">← Back to app</a></aside><section><h1 class="t">Incoming orders</h1><p>Orders placed in this browser appear here.</p>${L.length?`<div class="gx">${L.map(o=>`<div class="c"><div class="rw"><b style="font-size:20px;color:var(--navy)">${o.no}</b><span class="pl b">${STAT[o.st]}</span></div><div><b>${esc(o.name)}</b> · Grade ${o.grade}<br>📍 <b>${esc(o.room)}</b><br><small>Delivery ${o.time}</small></div>${o.items.map(x=>`<div class="rw" style="padding:2px 0"><span>${x.q}× ${x.n}</span></div>`).join("")}${o.notes?`<small>📝 ${esc(o.notes)}</small>`:""}${o.st==0&&!o.acc?`<button class="btn" onclick="sa('${o.no}')">Accept Order</button>`:o.st==0?`<button class="btn" onclick="sa('${o.no}')">Mark as Preparing</button>`:o.st==1?`<button class="btn g" onclick="sa('${o.no}')">Mark as Out for Delivery</button>`:o.st==2?`<button class="btn g" onclick="sa('${o.no}')">Mark as Delivered</button>`:`<button class="btn" disabled>Delivered</button>`}</div>`).join("")}</div>`:`<div class="c">No orders yet. Place a pre-order in the student app and it will show up here.</div>`}</section></div>`};
+R.guide=()=>{const s=(n,t,d,m)=>`<div class="c"><div class="st"><span class="nm">${n}</span><div style="flex:1"><h3>${t}</h3><span>${d}</span><div class="mock">${m}</div></div></div></div>`;
+ return `<div class="nv c" style="border-radius:24px"><h1 style="margin:0">How to use MCPI Canteen</h1><p style="margin:6px 0 0;opacity:.9">From login to food at your classroom in 7 steps. No need to leave class!</p></div><div class="gd">
+${s(1,"Log in","Type your name, choose your grade and enter your classroom. That is where your food is delivered. No password.","<div>👤 Juan Dela Cruz</div><div>🎓 Grade 9</div><div>📍 Grade 9 – Rizal, Room 204</div>")}
+${s(2,"Pick your food","Open Menu, filter by category and tap Add. Tap a food photo to choose quantity.","<div>🍗 Chicken Rice Meal · ₱65 · [+ Add]</div><div>🧃 Orange Juice · ₱20 · ✓ Added</div>")}
+${s(3,"Check your cart","Review items, change quantities or remove them.","<div>🍗 ×1 ₱65 · 🧃 ×2 ₱40</div><div><b>Total ₱105</b></div>")}
+${s(4,"Pre-order and confirm","Check the classroom to deliver to, pick a delivery time and tap Place pre-order. No payment is taken in this demo.","<div>📍 Room 204 · ⏰ 10:00 AM</div><div style='text-align:center'>✅ Order Placed Successfully!</div>")}
+${s(5,"Track your order","Status goes: Order received → Preparing → Out for delivery → Delivered. Your QR code stays locked until the order is out for delivery.",`<div style="text-align:center"><b>Order MCPI-001</b><br>✓ Received · ✓ Preparing · 3 Out · 4 Delivered<br>🔒 QR code locked</div>`)}
+${s(6,"Receive it in class","When the status says <b>Out for delivery</b>, your QR code appears. Show it to the runner, then tap Confirm received.",`<div style="text-align:center">🛵 <b>Your order is on its way!</b><div class="qb" style="width:110px;padding:6px;margin:6px auto">${QR("SAMPLE")}</div>Sample only</div>`)}
+</div><div class="c"><div class="st"><span class="nm">7</span><div style="flex:1"><h3>Delivery route</h3><span>Pick your grade to see how the runner gets from the Canteen to your classroom building.</span>${gradeChips()}<div class="cols2"><div>${map()}</div><div>${steps(S.grade)}</div></div></div></div></div>
+<div class="c"><h2>🏫 Campus layout</h2><ul style="padding-left:18px"><li><b>Grade 7 Building</b>: its bottom floor is the <b>Main Gate</b>.</li><li><b>SHS</b>: Senior High School building.</li><li><b>JHS</b>: Junior High School building.</li><li><b>Canteen</b>: right beside JHS. Students do not go here; staff deliver.</li><li><b>Open Stage</b>: right beside the Canteen.</li></ul><a class="btn" href="${S.user?"#/menu":"#/login"}">Try it now</a></div>`};
+
+const NV=[["home","Home"],["menu","Menu"],["orders","Orders"],["profile","Profile"]];
+const onk=r=>({home:"home",menu:"menu",item:"menu",cart:"menu",checkout:"menu",orders:"orders",track:"orders",delivery:"orders",done:"orders",profile:"profile"}[r]);
+const icn=(k,s)=>I(k=="home"?"home":k=="menu"?"menu":k=="orders"?"orders":"user",s);
+function topBar(r){return `<div class="top"><a class="b" href="${S.user?"#/home":"#/"}"><img src="logo.png" alt="">MCPI Canteen</a>${S.user?`<div class="dn">${NV.map(([k,l])=>`<a href="#/${k}" class="${onk(r)==k?"on":""}">${icn(k,20)}${l}</a>`).join("")}</div><a class="ib" href="#/cart">${I("cart")}${cartN()?`<span class="bd">${cartN()}</span>`:""}</a>`:""}</div>`}
+function nav(r){return `<div class="bn">${NV.map(([k,l])=>`<a href="#/${k}" class="${onk(r)==k?"on":""}">${icn(k,22)}${l}</a>`).join("")}</div>`}
+function go(){clearInterval(timer);
+ const h=(location.hash||"#/").slice(2).split("/"),r=R[h[0]]?h[0]:"welcome";
+ if(!S.user&&!["welcome","login","guide","staff"].includes(r)){location.hash="#/login";return}
+ if(S.user&&(r=="welcome"||r=="login")){location.hash="#/home";return}
+ const full=r=="welcome"||r=="login",st=r=="staff";let html=R[r](h[1]);
+ if(!full&&!st)html=topBar(r)+`<div class="pad">${html}</div>`;
+ if(S.user&&!full&&!st){if((r=="home"||r=="menu")&&cartN())html+=`<div class="fl"><span><b>${cartN()} item${cartN()>1?"s":""}</b><br>${peso(cartT())}</span><a class="btn w sm" href="#/cart">View cart ${I("arrow",16)}</a></div>`;html+=nav(r)}
+ A.className="phone"+(full?" full":"");A.innerHTML=html;
+ if(r=="track"){const o=cur();if(o&&o.st<2)timer=setInterval(adv,8000)}
+ if(location.hash!=lastH){scrollTo(0,0);lastH=location.hash}}
+function login(d){let n=d?"Demo Student":$("nm").value.trim();if(!n){alert("Please type your name.");$("nm").focus();return}
+ S.user=n;S.grade=+$("gr").value;S.sid=d?"":$("sid").value.trim();S.room=$("rm").value.trim()||(d?"Grade "+S.grade+" – Room 204":"");room=S.room;save();location.hash="#/home"}
+function logout(){S={user:"",grade:S.grade,sid:"",room:S.room,cart:{},orders:S.orders,count:S.count};save();location.hash="#/"}
+function resetDemo(){if(confirm("Clear all demo orders and restart numbering at MCPI-001?")){S.orders=[];S.cart={};S.count=0;save();go()}}
+function add(id){S.cart[id]=1;save();go()}
+function chg(id,d){const n=(S.cart[id]||0)+d;if(n<=0)delete S.cart[id];else S.cart[id]=n;save();go()}
+function place(){if(!room.trim()){alert("Please enter your classroom so we know where to deliver.");return}
+ S.room=room.trim();S.count++;S.orders.push({no:"MCPI-"+String(S.count).padStart(3,"0"),name:S.user,grade:S.grade,room:S.room,items:Object.entries(S.cart).map(([i,n])=>({...item(i),q:n})),total:cartT(),time:pick,notes:note,st:0,acc:false});S.cart={};note="";save();location.hash="#/done"}
+function adv(){const o=cur();if(o&&o.st<3){o.st++;if(o.st>0)o.acc=true;save();go()}}
+function done(){cur().st=3;save();go()}
+function sa(no){const o=S.orders.find(x=>x.no==no);if(o.st==0&&!o.acc)o.acc=true;else if(o.st<3)o.st++;save();go()}
+addEventListener("hashchange",go);addEventListener("storage",e=>{if(e.key=="mcpi"){load();go()}});go();
+</script></body></html>
