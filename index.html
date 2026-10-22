@@ -50,8 +50,8 @@ label.l{display:block;font-weight:700;margin:12px 0 6px;font-size:0.875rem}
 .tl i{width:32px;height:32px;border-radius:50%;background:var(--sf);border:3px solid var(--ln);display:grid;place-items:center;font-style:normal;z-index:1;font-size:0.875rem}.tl li.d{color:var(--hd);font-weight:700}.tl li.d i{background:var(--pr);border-color:var(--pr);color:#fff}.tl li.d:before{background:var(--pr)}
 .demo{background:var(--sf2);border-radius:14px;padding:10px 12px;font-size:0.8125rem;color:var(--mu);margin:12px 0}
 .ok{background:var(--ok);color:#fff;border-radius:18px;padding:14px 16px;display:flex;gap:10px;align-items:center;font-size:1.25rem;font-weight:800;margin-bottom:14px}
-.wl{min-height:100vh;background:var(--hero);color:#fff;padding:36px 22px 0;position:relative;overflow:hidden}.wl:before{content:"";position:absolute;right:-110px;top:180px;width:320px;height:320px;border-radius:50%;background:#ffffff1c}.wl:after{content:"";position:absolute;left:-80px;top:-60px;width:220px;height:220px;border-radius:50%;background:#ffffff12}.wl>*{position:relative;z-index:1}
-.tkw{width:80%;margin:26px auto -90px;color:var(--tx)}
+.wl{min-height:100vh;min-height:100dvh;background:var(--hero);color:#fff;padding:36px 22px 56px;position:relative;overflow:hidden}.wl:before{content:"";position:absolute;right:-110px;top:180px;width:320px;height:320px;border-radius:50%;background:#ffffff1c}.wl:after{content:"";position:absolute;left:-80px;top:-60px;width:220px;height:220px;border-radius:50%;background:#ffffff12}.wl>*{position:relative;z-index:1}
+.tkw{width:min(86%,340px);margin:28px auto 0;color:var(--tx)}
 .logo{width:96px;height:96px;border-radius:50%;background:#fff;padding:5px;box-shadow:0 0 0 6px #ffffff33}.logo img{width:100%;height:100%}.lgl{width:84px;height:84px;background:#fff;border-radius:50%;padding:4px}
 .tg{position:absolute;top:14px;right:14px;z-index:4}
 .lg{position:relative}.lg .c{margin:-40px 16px 16px;padding:20px}.lg .nv{background:var(--hero);color:#fff;text-align:center;padding:34px 20px 70px}.lg .nv h1{color:#fff}
@@ -135,6 +135,36 @@ html{color-scheme:light}[data-theme=dark]{color-scheme:dark}html{scrollbar-color
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}@keyframes slideUp{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
 @media(min-width:640px){.sheet-bg{align-items:center}.sheet{border-radius:26px;border-bottom:1px solid var(--ln);padding-bottom:22px}}
 .cc-row{gap:16px;padding-bottom:8px}.cc{flex:none;width:78px;text-align:center;cursor:pointer;font-weight:700;font-size:.95rem;color:var(--hd)}.cc span{width:66px;height:66px;border-radius:50%;background:var(--sf2);border:2px solid var(--ln);display:grid;place-items:center;font-size:2rem;margin:0 auto 6px}.cc:hover span{border-color:var(--pr)}
+
+/* ---- mobile fixes (phones and small tablets only; desktop layout is untouched) ---- */
+.phone{min-height:100vh;min-height:100dvh}.stf{min-height:100vh;min-height:100dvh}
+@media(max-width:899px){
+ .bn{bottom:calc(10px + env(safe-area-inset-bottom))}
+ .fl{bottom:calc(84px + env(safe-area-inset-bottom))}
+ .pad{padding-bottom:calc(150px + env(safe-area-inset-bottom))}
+ .toast{bottom:calc(100px + env(safe-area-inset-bottom))}
+}
+@media(max-width:640px){
+ .stf aside{flex-direction:row;flex-wrap:wrap;align-items:center;gap:8px 14px;padding:14px 16px}
+ .stf aside>div{flex-basis:100%}
+ .stf section{padding:16px}
+ .sl button:first-child{grid-column:1/-1}
+ .rw>a{white-space:nowrap;flex:none}
+ .sec{font-size:1.3rem;min-width:0}
+}
+@media(max-width:420px){
+ .top{gap:6px;padding:8px 10px}
+ .top .b{font-size:1rem;gap:6px;min-width:0;white-space:nowrap}
+ .top img{width:30px;height:30px}
+ .ib.fs{padding:0 9px}
+ .pad{padding-left:12px;padding-right:12px}
+ .wl{padding-left:18px;padding-right:18px}
+ .hero{padding:18px}
+ .c{padding:14px}
+ .stp div{font-size:.8rem;gap:5px}
+ .rf{gap:10px}
+ .t{font-size:1.4rem;line-height:1.25}
+}
 </style></head><body><div id="app" class="phone"></div>
 <script>
 try{const D=document.documentElement.dataset;D.theme=localStorage.getItem("mcpi-theme")||(matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light");D.fs=localStorage.getItem("mcpi-fs")||"0";if(localStorage.getItem("mcpi-hc")=="1")D.hc="1"}catch(e){}
