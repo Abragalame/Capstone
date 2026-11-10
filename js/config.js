@@ -1,7 +1,7 @@
 /* ===== Edit this file only: your Appwrite IDs and the 7 stalls ===== */
 const CONFIG = {
   endpoint: 'https://sgp.cloud.appwrite.io/v1', // region taken from your capstone.sgp.appwrite.run URL
-  projectId: 'REPLACE_WITH_YOUR_PROJECT_ID',
+  projectId: '6af37ffe0007eaf736fa',
   databaseId: 'canteen',
   tables: { menu: 'menu_items', orders: 'orders' },
   bucketId: 'menu_images',
