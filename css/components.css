@@ -1,0 +1,11 @@
+/* New shared pieces */
+.boot{padding:40vh 20px;text-align:center;color:var(--mu);font-weight:700}
+.rolebadge{display:inline-flex;align-items:center;padding:4px 12px;border-radius:999px;font-weight:800;font-size:.8125rem;white-space:nowrap}
+.rb-student{background:var(--sf2);color:var(--hd)}
+.rb-staff{background:#dff5e8;color:#157a49}
+.rb-admin{background:#fff0cc;color:#8a5a00}
+[data-theme=dark] .rb-staff{background:#12402d;color:#6fe0a6}
+[data-theme=dark] .rb-admin{background:#4a3a0c;color:#ffd36b}
+.chk{display:flex;align-items:center;gap:10px;margin:14px 0 8px;font-weight:600}
+.chk input{width:22px;height:22px}
+textarea.in{resize:vertical}
