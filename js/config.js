@@ -4,7 +4,7 @@ const CONFIG = {
   projectId: '6af37ffe0007eaf736fa',
   databaseId: 'canteen',
   tables: { menu: 'menu_items', orders: 'orders' },
-  bucketId: 'menu_images',
+  bucketId: '6af3a7630023562ad767',
   functionId: 'manage-users',
 };
 
