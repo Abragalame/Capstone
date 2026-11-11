@@ -3,8 +3,8 @@ const CONFIG = {
   endpoint: 'https://sgp.cloud.appwrite.io/v1', // region taken from your capstone.sgp.appwrite.run URL
   projectId: '6af37ffe0007eaf736fa',
   databaseId: 'canteen',
-  tables: { menu: '6af3a57400325ddbc89f', orders: '6af3a698001454e4aa62' },
-  bucketId: '6af3a7630023562ad767',
+  tables: { menu: 'menu_items', orders: 'orders' },
+  bucketId: 'menu_images',
   functionId: 'manage-users',
 };
 
