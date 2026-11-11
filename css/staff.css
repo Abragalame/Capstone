@@ -1,6 +1,7 @@
 /* Staff dashboard */
-.topline{display:flex;justify-content:flex-end;align-items:center;gap:10px;margin-bottom:10px}
+.topline{display:flex;flex-wrap:wrap;justify-content:flex-end;align-items:center;gap:10px;margin-bottom:10px}
 .stf .snav{font-weight:700;padding:4px 0;text-decoration:none}
 .stf .snav.on{color:#fff;text-decoration:underline}
 .mpv{display:block;width:100%;max-width:320px;aspect-ratio:4/3;object-fit:cover;border-radius:16px;margin:8px 0}
 .mpv[hidden]{display:none}
+.stabs{margin:0 0 16px}

@@ -2,6 +2,8 @@ import { Client, Users, Query } from 'node-appwrite';
 
 // Runs server-side with a dynamic API key (scopes: users.read, users.write).
 // Only callers whose account has the "admin" label may use it.
+const has = (labels, name) => labels.some((l) => l.toLowerCase() === name);
+
 export default async ({ req, res, error }) => {
   try {
     const callerId = req.headers['x-appwrite-user-id'];
@@ -14,7 +16,7 @@ export default async ({ req, res, error }) => {
     const users = new Users(client);
 
     const caller = await users.get({ userId: callerId });
-    if (!caller.labels.includes('admin')) return res.json({ error: 'Admins only.' }, 403);
+    if (!has(caller.labels, 'admin')) return res.json({ error: 'Admins only.' }, 403);
 
     const { action, userId, role } = req.bodyJson ?? {};
 
@@ -30,9 +32,9 @@ export default async ({ req, res, error }) => {
         return res.json({ error: 'Invalid request.' }, 400);
       }
       const target = await users.get({ userId });
-      if (target.labels.includes('admin')) return res.json({ error: 'Cannot change an admin.' }, 400);
+      if (has(target.labels, 'admin')) return res.json({ error: 'Cannot change an admin.' }, 400);
 
-      const labels = target.labels.filter((l) => l !== 'staff');
+      const labels = target.labels.filter((l) => l.toLowerCase() !== 'staff');
       if (role === 'staff') labels.push('staff');
       await users.updateLabels({ userId, labels });
       return res.json({ ok: true });

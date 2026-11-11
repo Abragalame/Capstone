@@ -6,9 +6,9 @@ const stfAside = () => {
 <a href="#/staff" class="snav ${staffTab == 'orders' && stfPage == 'staff' ? 'on' : ''}" onclick="setStaffTab('orders')">🧾 Orders</a>
 <a href="#/staff" class="snav ${staffTab == 'menu' && stfPage == 'staff' ? 'on' : ''}" onclick="setStaffTab('menu')">🍽️ Manage menu</a>
 ${S.role == 'admin' ? `<a href="#/admin" class="snav ${stfPage == 'admin' ? 'on' : ''}">👥 Users</a>` : ''}
-<span>🆕 Received: ${n(0)}</span><span>👩‍🍳 Preparing: ${n(1)}</span><span>🛵 On the way / ready: ${n(2)}</span><span>✅ Completed: ${n(3)}</span>${themeBtn()}<a href="#/home">← Student view</a></aside>`;
+<span>🆕 Received: ${n(0)}</span><span>👩‍🍳 Preparing: ${n(1)}</span><span>🛵 On the way / ready: ${n(2)}</span><span>✅ Completed: ${n(3)}</span>${themeBtn()}</aside>`;
 };
-const stfTop = () => `<div class="topline">${roleBadge()}<button class="btn ol sm" onclick="logout()">Log out</button></div>`;
+const stfTop = () => `<div class="topline">${viewSwitch(stfPage)}${roleBadge()}<button class="btn ol sm" onclick="logout()">Log out</button></div>`;
 
 const staffOrdersHtml=()=>{const L=S.allOrders.slice().reverse();return `<h1 class="t">Incoming orders</h1><p>Orders from students appear here automatically.</p>${L.length?`<div class="gx">${L.map(o=>{const pk=o.mode=="pickup";return `<div class="c"><div class="rw"><b style="font-size:1.25rem;color:var(--hd)">${o.no}</b><span class="pl b">${stat(o)[o.st]}</span></div><div><b>${esc(o.name)}</b> · Grade ${o.grade}<br>${pk?"🏃 <b>Pickup at canteen</b>":"📍 <b>"+esc(o.room)+"</b>"}<br><small class="rmark">${pk?"Pickup":"Delivery"} ${o.time}</small></div>${o.items.map(x=>`<div class="rw" style="padding:2px 0"><span>${x.q}× ${x.n}</span></div>`).join("")}${o.notes?`<small>📝 ${esc(o.notes)}</small>`:""}${o.st==0&&!o.acc?`<button class="btn" onclick="sa('${o.no}')">Accept Order</button>`:o.st==0?`<button class="btn" onclick="sa('${o.no}')">Mark as Preparing</button>`:o.st==1?`<button class="btn g" onclick="sa('${o.no}')">${pk?"Mark as Ready for Pickup":"Mark as Out for Delivery"}</button>`:o.st==2?`<button class="btn g" onclick="sa('${o.no}')">${pk?"Mark as Picked up":"Mark as Delivered"}</button>`:`<button class="btn" disabled>Completed</button>`}</div>`}).join("")}</div>`:`<div class="c">No orders yet. Place a pre-order in the student app and it will show up here.</div>`}`};
 
@@ -38,5 +38,5 @@ function staffMenuHtml() {
 
 R.staff = () => {
   stfPage = 'staff';
-  return `<div class="stf">${stfAside()}<section>${stfTop()}${staffTab == 'menu' ? staffMenuHtml() : staffOrdersHtml()}</section></div>`;
+  return `<div class="stf">${stfAside()}<section>${stfTop()}<div class="seg stabs" role="group" aria-label="Staff sections"><button class="${staffTab == 'orders' ? 'on' : ''}" onclick="setStaffTab('orders')">🧾 Orders</button><button class="${staffTab == 'menu' ? 'on' : ''}" onclick="setStaffTab('menu')">🍽️ Add · Edit · Delete menu</button></div>${staffTab == 'menu' ? staffMenuHtml() : staffOrdersHtml()}</section></div>`;
 };

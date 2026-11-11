@@ -8,9 +8,9 @@ function go(){clearInterval(timer);closeSheet();
  const h=(location.hash||"#/").slice(2).split("/"),r=R[h[0]]?h[0]:"welcome";
  if(!S.user&&!["welcome","login","guide"].includes(r)){location.hash="#/login";return}
  if(S.user&&(r=="welcome"||r=="login")){location.hash=homeHash();return}
- if((r=="staff"&&S.role=="student")||(r=="admin"&&S.role!="admin")){location.hash=homeHash();return}
+ if(!canView(r)){location.hash=homeHash();return}
  const full=r=="welcome"||r=="login",st=r=="staff"||r=="admin";let html=R[r](h[1]);
- if(!full&&!st)html=topBar(r)+`<div class="pad">${html}<footer class="ft">Maryknoll College of Panabo, Inc. · Capstone demo · No real payments</footer></div>`;
+ if(!full&&!st)html=topBar(r)+viewBar()+`<div class="pad">${html}<footer class="ft">Maryknoll College of Panabo, Inc. · Capstone demo · No real payments</footer></div>`;
  if(S.user&&!full&&!st){if((r=="home"||r=="menu")&&cartN())html+=`<div class="fl"><span><b>${cartN()} item${cartN()>1?"s":""}</b><br>${peso(cartT())}</span><a class="btn w sm" href="#/cart">View cart ${I("arrow",16)}</a></div>`;html+=nav(r)}
  A.className="phone"+(full||st?" full":"");A.innerHTML=html;hsAll();setTimeout(hsAll,300);
  if(r=="admin")AdminController.load();

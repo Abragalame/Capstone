@@ -2,7 +2,7 @@
    (only the manage-users function or the Console can change labels). */
 const AuthService = {
   roleFromLabels(labels) {
-    labels = labels || [];
+    labels = (labels || []).map((l) => String(l).toLowerCase());
     return labels.includes('admin') ? 'admin' : labels.includes('staff') ? 'staff' : 'student';
   },
   async current() {
