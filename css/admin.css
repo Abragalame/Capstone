@@ -3,3 +3,4 @@
 .urow b,.urow small{display:block;overflow-wrap:anywhere}
 .urow .ctl{display:flex;align-items:center;gap:10px}
 @media(max-width:520px){.urow .ctl{width:100%;justify-content:space-between}}
+.urow select.in{width:auto;min-height:38px;padding:0 10px}

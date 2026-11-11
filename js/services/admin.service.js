@@ -16,6 +16,9 @@ const AdminService = {
   async listUsers() {
     return (await this.call({ action: 'list' })).users;
   },
+  async setStall(userId, stall) {
+    await this.call({ action: 'setStall', userId, stall: Number(stall) });
+  },
   async setRole(userId, role) {
     await this.call({ action: 'setRole', userId, role });
   },

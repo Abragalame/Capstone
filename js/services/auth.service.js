@@ -8,7 +8,8 @@ const AuthService = {
   async current() {
     try {
       const u = await AW.account.get();
-      return { id: u.$id, name: u.name, email: u.email, role: this.roleFromLabels(u.labels), prefs: u.prefs || {} };
+      return { id: u.$id, name: u.name, email: u.email, role: this.roleFromLabels(u.labels), prefs: u.prefs || {},
+        stalls: (u.labels || []).map((l) => /^stall([1-7])$/i.exec(String(l))).filter(Boolean).map((m) => +m[1]) };
     } catch (e) {
       return null;
     }

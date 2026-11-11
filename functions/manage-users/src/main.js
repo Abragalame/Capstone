@@ -18,7 +18,7 @@ export default async ({ req, res, error }) => {
     const caller = await users.get({ userId: callerId });
     if (!has(caller.labels, 'admin')) return res.json({ error: 'Admins only.' }, 403);
 
-    const { action, userId, role } = req.bodyJson ?? {};
+    const { action, userId, role, stall } = req.bodyJson ?? {};
 
     if (action === 'list') {
       const list = await users.list({ queries: [Query.limit(100), Query.orderDesc('$createdAt')] });
@@ -34,8 +34,21 @@ export default async ({ req, res, error }) => {
       const target = await users.get({ userId });
       if (has(target.labels, 'admin')) return res.json({ error: 'Cannot change an admin.' }, 400);
 
-      const labels = target.labels.filter((l) => l.toLowerCase() !== 'staff');
+      /* changing role also clears any stall assignment */
+      const labels = target.labels.filter((l) => l.toLowerCase() !== 'staff' && !/^stall[1-7]$/i.test(l));
       if (role === 'staff') labels.push('staff');
+      await users.updateLabels({ userId, labels });
+      return res.json({ ok: true });
+    }
+
+    if (action === 'setStall') {
+      const n = Number(stall);
+      if (!userId || !Number.isInteger(n) || n < 0 || n > 7) return res.json({ error: 'Invalid request.' }, 400);
+      const target = await users.get({ userId });
+      if (has(target.labels, 'admin')) return res.json({ error: 'Cannot change an admin.' }, 400);
+      if (!has(target.labels, 'staff')) return res.json({ error: 'Make this user staff first.' }, 400);
+      const labels = target.labels.filter((l) => !/^stall[1-7]$/i.test(l));
+      if (n > 0) labels.push('stall' + n);
       await users.updateLabels({ userId, labels });
       return res.json({ ok: true });
     }

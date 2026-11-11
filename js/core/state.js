@@ -7,7 +7,7 @@ const I=(n,s=22)=>`<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="non
 let MENU = []; /* loaded from Appwrite (js/services/menu.service.js) */
 const CATS=["Meals","Noodles","Snacks","Drinks"],CI={Meals:"🍛",Noodles:"🍜",Snacks:"🥟",Drinks:"🧃"};
 const stat=o=>o.mode=="pickup"?["Order received","Preparing","Ready for pickup","Picked up"]:["Order received","Preparing","Out for delivery","Delivered"];
-let S={user:"",uid:"",email:"",role:"student",grade:9,sid:"",room:"",rn:"",cart:{},orders:[],allOrders:[],count:0};
+let S={user:"",uid:"",email:"",role:"student",stalls:[],grade:9,sid:"",room:"",rn:"",cart:{},orders:[],allOrders:[],count:0};
 /* new UI state: browse-by-stall, staff tabs, menu editor, login/register toggle, pref sync */
 let stall=0,staffTab="orders",staffStall=0,editId=null,authMode="login",prefSig="",prefT=null;
 /* The classroom is stored as a grade (S.grade) plus a room number (S.rn). S.room is the text built from them. */
@@ -17,7 +17,7 @@ const syncRoom=()=>{S.room=roomText(S.grade,S.rn)};
 const load=()=>{try{Object.assign(S,JSON.parse(localStorage.getItem("mcpi")||"{}"))}catch(e){}
  if(!S.rn&&S.room){const m=String(S.room).match(/room\s*([A-Za-z0-9-]+)\s*$/i)||String(S.room).match(/([A-Za-z0-9-]*\d[A-Za-z0-9-]*)\s*$/);S.rn=m?cleanRn(m[1]):""}
  syncRoom()};load();
-const save=()=>{try{const{user,uid,email,role,orders,allOrders,...keep}=S;localStorage.setItem("mcpi",JSON.stringify(keep))}catch(e){}syncPrefs()};
+const save=()=>{try{const{user,uid,email,role,stalls,orders,allOrders,...keep}=S;localStorage.setItem("mcpi",JSON.stringify(keep))}catch(e){}syncPrefs()};
 /* grade / room / student ID follow the account (saved to Appwrite prefs) */
 function syncPrefs(){if(!S.uid)return;const p={grade:S.grade,rn:S.rn,sid:S.sid},sg=JSON.stringify(p);if(sg==prefSig)return;prefSig=sg;clearTimeout(prefT);prefT=setTimeout(()=>AuthService.savePrefs(p).catch(()=>{}),800)}
 const $=id=>document.getElementById(id),A=$("app");

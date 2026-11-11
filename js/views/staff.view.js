@@ -1,25 +1,44 @@
 /* Staff dashboard: Orders tab (original demo markup, now live) + Manage menu tab (new). */
 let stfPage = 'staff';
 const stfAside = () => {
-  const n = (k) => S.allOrders.filter((o) => o.st == k).length;
-  return `<aside><div style="display:flex;gap:10px;align-items:center"><img class="lgl" style="width:44px;height:44px" src="logo.png" alt=""><b>Canteen ${S.role == 'admin' ? 'Admin' : 'Staff'}</b></div>
+  const mine = visibleOrders().flatMap((o) => partIds(o).filter(canAct).map((i) => o.parts[i])), n = (k) => mine.filter((v) => v == k).length;
+  return `<aside><div style="display:flex;gap:10px;align-items:center"><img class="lgl" style="width:44px;height:44px" src="logo.png" alt=""><b>${S.role == 'admin' ? 'Canteen Admin' : S.stalls.length ? esc(S.stalls.map(stallName).join(' & ')) + ' Staff' : 'Canteen Staff'}</b></div>
 <a href="#/staff" class="snav ${staffTab == 'orders' && stfPage == 'staff' ? 'on' : ''}" onclick="setStaffTab('orders')">🧾 Orders</a>
 <a href="#/staff" class="snav ${staffTab == 'menu' && stfPage == 'staff' ? 'on' : ''}" onclick="setStaffTab('menu')">🍽️ Manage menu</a>
 ${S.role == 'admin' ? `<a href="#/admin" class="snav ${stfPage == 'admin' ? 'on' : ''}">👥 Users</a>` : ''}
-<span>🆕 Received: ${n(0)}</span><span>👩‍🍳 Preparing: ${n(1)}</span><span>🛵 On the way / ready: ${n(2)}</span><span>✅ Completed: ${n(3)}</span>${themeBtn()}</aside>`;
+<span>🆕 Received: ${n(0)}</span><span>👩‍🍳 Preparing: ${n(1)}</span><span>🔔 Ready: ${n(2)}</span><span>✅ Completed: ${n(3)}</span>${themeBtn()}</aside>`;
 };
 const stfTop = () => `<div class="topline">${viewSwitch(stfPage)}${roleBadge()}<button class="btn ol sm" onclick="logout()">Log out</button></div>`;
 
-const staffOrdersHtml=()=>{const L=S.allOrders.slice().reverse();return `<h1 class="t">Incoming orders</h1><p>Orders from students appear here automatically.</p>${L.length?`<div class="gx">${L.map(o=>{const pk=o.mode=="pickup";return `<div class="c"><div class="rw"><b style="font-size:1.25rem;color:var(--hd)">${o.no}</b><span class="pl b">${stat(o)[o.st]}</span></div><div><b>${esc(o.name)}</b> · Grade ${o.grade}<br>${pk?"🏃 <b>Pickup at canteen</b>":"📍 <b>"+esc(o.room)+"</b>"}<br><small class="rmark">${pk?"Pickup":"Delivery"} ${o.time}</small></div>${o.items.map(x=>`<div class="rw" style="padding:2px 0"><span>${x.q}× ${x.n}</span></div>`).join("")}${o.notes?`<small>📝 ${esc(o.notes)}</small>`:""}${o.st==0&&!o.acc?`<button class="btn" onclick="sa('${o.no}')">Accept Order</button>`:o.st==0?`<button class="btn" onclick="sa('${o.no}')">Mark as Preparing</button>`:o.st==1?`<button class="btn g" onclick="sa('${o.no}')">${pk?"Mark as Ready for Pickup":"Mark as Out for Delivery"}</button>`:o.st==2?`<button class="btn g" onclick="sa('${o.no}')">${pk?"Mark as Picked up":"Mark as Delivered"}</button>`:`<button class="btn" disabled>Completed</button>`}</div>`}).join("")}</div>`:`<div class="c">No orders yet. Place a pre-order in the student app and it will show up here.</div>`}`};
+const visibleOrders = () => S.allOrders.filter((o) => partIds(o).some(canAct));
+const partBtn = (o, i) => {
+  const v = o.parts[i], pk = o.mode == 'pickup';
+  if (v == 0) return `<button class="btn" onclick="sa('${o.no}',${i})">Start preparing</button>`;
+  if (v == 1) return `<button class="btn g" onclick="sa('${o.no}',${i})">Mark ready</button>`;
+  if (v == 2) return pk ? `<button class="btn g" onclick="sa('${o.no}',${i})">Handed to student</button>` : '<small class="rmark">Ready – waiting for the other stalls</small>';
+  return '<button class="btn" disabled>Done</button>';
+};
+const staffOrderCard = (o) => {
+  const pk = o.mode == 'pickup', ids = partIds(o), mine = ids.filter(canAct), others = ids.filter((i) => !canAct(i));
+  return `<div class="c"><div class="rw"><b style="font-size:1.25rem;color:var(--hd)">${o.no}</b><span class="pl b">${stat(o)[o.st]}</span></div>
+<div><b>${esc(o.name)}</b> · Grade ${o.grade}<br>${pk ? '🏃 <b>Pickup</b>' : '📍 <b>' + esc(o.room) + '</b>'}<br><small class="rmark">${pk ? 'Pickup' : 'Delivery'} ${o.time}</small></div>
+${mine.map((i) => `<div class="stp"><div class="rw"><b>${esc(stallName(i))}</b>${partPill(pk, o.parts[i])}</div>${partItems(o, i).map((x) => `<div class="rw" style="padding:2px 0"><span>${x.q}× ${x.n}</span></div>`).join('')}${partBtn(o, i)}</div>`).join('')}
+${others.length ? `<small class="rmark">Other stalls: ${others.map((i) => esc(stallName(i)) + ' – ' + PART_LBL(pk)[o.parts[i]]).join(' · ')}</small>` : ''}
+${o.notes ? `<small>📝 ${esc(o.notes)}</small>` : ''}${!pk && o.st == 2 ? `<button class="btn g" onclick="saAll('${o.no}')">Mark as Delivered</button>` : ''}</div>`;
+};
+const staffOrdersHtml = () => {
+  const L = visibleOrders().reverse(), scoped = S.role != 'admin' && S.stalls.length;
+  return `<h1 class="t">${scoped ? 'Orders for ' + esc(S.stalls.map(stallName).join(' & ')) : 'Incoming orders'}</h1><p>${scoped ? 'You only see the dishes from your stall. Other stalls’ progress is shown on each order.' : 'Orders from students appear here automatically, split by stall.'}</p>${L.length ? `<div class="gx">${L.map(staffOrderCard).join('')}</div>` : '<div class="c">No orders yet. New orders appear here by themselves.</div>'}`;
+};
 
 function staffMenuHtml() {
   const e = editId ? item(editId) : null, r = e ? e._raw : {};
   const sel = (v, cur) => (v == cur ? 'selected' : '');
-  const list = MENU.filter((m) => !staffStall || m.stall == staffStall);
-  const chips = [0, ...STALLS.map((s) => s.id)].map((id) => `<button class="ch ${id == staffStall ? 'on' : ''}" onclick="setStaffStall(${id})">${id ? esc(stallName(id)) : 'All stalls'}</button>`).join('');
+  const list = MENU.filter((m) => myStalls().includes(m.stall) && (!staffStall || m.stall == staffStall));
+  const chips = [0, ...myStalls()].map((id) => `<button class="ch ${id == staffStall ? 'on' : ''}" onclick="setStaffStall(${id})">${id ? esc(stallName(id)) : 'All stalls'}</button>`).join('');
   return `<h1 class="t">Manage menu</h1><p>Add, edit or remove dishes. Pick which stall (1–7) each dish belongs to.</p>
 <div class="c"><h2>${e ? 'Edit dish' : 'Add a dish'}</h2>
-<div class="rf"><div><label class="l" for="mStall">Stall</label><select class="in" id="mStall">${STALLS.map((s) => `<option value="${s.id}" ${e ? sel(s.id, e.stall) : ''}>${esc(s.name)}</option>`).join('')}</select></div>
+<div class="rf"><div><label class="l" for="mStall">Stall</label><select class="in" id="mStall">${STALLS.filter((s) => myStalls().includes(s.id)).map((s) => `<option value="${s.id}" ${e ? sel(s.id, e.stall) : ''}>${esc(s.name)}</option>`).join('')}</select></div>
 <div><label class="l" for="mCat">Category</label><select class="in" id="mCat">${CATS.map((c) => `<option ${e ? sel(c, e.c) : ''}>${c}</option>`).join('')}</select></div></div>
 <label class="l" for="mName">Dish name</label><input class="in" id="mName" maxlength="120" value="${esc(r.name || '')}">
 <label class="l" for="mDesc">Description</label><textarea class="in" id="mDesc" rows="3" maxlength="1000">${esc(r.description || '')}</textarea>

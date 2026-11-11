@@ -2,7 +2,7 @@
 function setAuthMode(m) { authMode = m; go(); }
 
 async function applyUser(u) {
-  S.user = u.name || u.email; S.uid = u.id; S.email = u.email; S.role = u.role;
+  S.user = u.name || u.email; S.uid = u.id; S.email = u.email; S.role = u.role; S.stalls = u.stalls || [];
   const p = u.prefs || {};
   if (p.grade) S.grade = +p.grade;
   if (p.rn != null) S.rn = cleanRn(p.rn);
@@ -48,7 +48,7 @@ async function submitAuth() {
 
 async function logout() {
   try { await AuthService.logout(); } catch (e) { /* already signed out */ }
-  S.user = ''; S.uid = ''; S.email = ''; S.role = 'student'; S.cart = {}; S.orders = []; S.allOrders = [];
+  S.user = ''; S.uid = ''; S.email = ''; S.role = 'student'; S.stalls = []; S.cart = {}; S.orders = []; S.allOrders = [];
   MENU = [];
   save();
   location.hash = '#/';

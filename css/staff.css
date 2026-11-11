@@ -5,3 +5,4 @@
 .mpv{display:block;width:100%;max-width:320px;aspect-ratio:4/3;object-fit:cover;border-radius:16px;margin:8px 0}
 .mpv[hidden]{display:none}
 .stabs{margin:0 0 16px}
+.stp{border:1px solid var(--ln);border-radius:14px;padding:10px;margin:8px 0;display:flex;flex-direction:column;gap:6px}

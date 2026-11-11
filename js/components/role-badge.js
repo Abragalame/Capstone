@@ -16,3 +16,7 @@ const viewSwitch = (active) => S.role !== 'admin' ? '' :
     .map(([k, l, h]) => `<button class="${k === active ? 'on' : ''}" onclick="location.hash='${h}'">${l}</button>`).join('')}</div>`;
 const viewBar = () => S.role !== 'admin' ? '' :
   `<div class="viewbar"><span>Viewing as <b>Student</b></span>${viewSwitch('student')}</div>`;
+
+/* Which stalls this person works at. No stall label = all stalls (supervisor). Admin = all. */
+const myStalls = () => (S.role === 'admin' || !S.stalls.length ? STALLS.map((s) => s.id) : S.stalls);
+const canAct = (stallId) => myStalls().includes(Number(stallId));

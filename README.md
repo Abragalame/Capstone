@@ -72,6 +72,11 @@ Table `orders`
 | st | integer | default 0 |
 | acc | boolean | default false |
 
+| s1 … s7 | integer ×7 | **one column per stall**, min -1, max 3, default -1 (`s1`, `s2`, `s3`, `s4`, `s5`, `s6`, `s7`) |
+
+`s1`–`s7` hold each stall's progress for that order: -1 = no items from that stall, 0 received, 1 preparing, 2 ready, 3 collected/delivered.
+Separate columns mean two stalls can update the same order at the same moment without overwriting each other.
+
 Index: key on `userId`. Settings: turn **Row security ON**. Table permissions: Create = **Users**;
 Read + Update = **Label `staff`** and **Label `admin`**. (Each student gets read/update on their own order automatically.)
 
@@ -98,12 +103,17 @@ allowed extensions jpg, jpeg, png, webp, gif; max 5 MB.
 2. Console → Auth → your user → **Labels** → add `admin` → Update. Log out and in again.
 3. You land on the **Admin** page (top-right shows "Admin"). Click **Import sample menu** to load your original dishes.
 
+## 4b. Assign staff to stalls
+
+Admin page → each staff member has a **stall** dropdown (Stall 1–7, or *All stalls* for a supervisor/cashier).
+It adds a label `stall1`…`stall7` to their account. Redeploy the `manage-users` function after updating it (new `setStall` action).
+
 ## 5. How roles work
 
 - Every registered account is a **Student** (top-right says "Student").
 - Admin page → **Make staff**. That user's next visit opens the **Staff** dashboard instead, with "Staff" top-right.
-- Staff: **Orders** tab (your original dashboard, live) and **Manage menu** tab (add / edit / delete dishes,
-  choose Stall 1–7, upload a photo).
+- Staff: **Orders** tab (live, split by stall) and **Manage menu** tab (add / edit / delete dishes, upload a photo).
+  A staff member assigned to a stall only sees that stall's dishes and order items, and can only manage that stall's menu.
 - Roles are Appwrite labels that browsers cannot change; permissions are enforced by Appwrite, not just hidden in the UI.
 
 ## Notes
@@ -113,3 +123,12 @@ allowed extensions jpg, jpeg, png, webp, gif; max 5 MB.
 - Appwrite can't limit which fields a student may update on their own order row, so a technically skilled student
   could edit their own order. For a capstone this is acceptable; to harden it, move order status changes into the function.
 - Your original CSS is kept untouched in `css/base.css` so nothing looks different; new role styles live in their own files.
+
+## Orders from several stalls
+
+An order is split into one part per stall. Each stall moves only its own part: Received → Preparing → Ready → Handed over.
+- **Pickup:** the QR unlocks as soon as any stall is ready. The student's page lists every stall with its status and
+  which counters to visit; they can collect early or wait and do one trip. They get an on-screen alert when a stall becomes ready.
+- **Delivery:** nothing leaves until every stall is ready; then staff press *Mark as Delivered*.
+- Each stall's card also shows the other stalls' progress, and staff get an alert when another stall finishes its part.
+- Menu limits per stall are enforced in the interface; Appwrite cannot restrict table writes per stall.
