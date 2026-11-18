@@ -5,7 +5,7 @@ const stfAside = () => {
   return `<aside><div style="display:flex;gap:10px;align-items:center"><img class="lgl" style="width:44px;height:44px" src="logo.png" alt=""><b>${S.role == 'admin' ? 'Canteen Admin' : S.stalls.length ? esc(S.stalls.map(stallName).join(' & ')) + ' Staff' : 'Canteen Staff'}</b></div>
 <a href="#/staff" class="snav ${staffTab == 'orders' && stfPage == 'staff' ? 'on' : ''}" onclick="setStaffTab('orders')">🧾 Orders</a>
 <a href="#/staff" class="snav ${staffTab == 'menu' && stfPage == 'staff' ? 'on' : ''}" onclick="setStaffTab('menu')">🍽️ Manage menu</a>
-${S.role == 'admin' ? `<a href="#/admin" class="snav ${stfPage == 'admin' ? 'on' : ''}">👥 Users</a>` : ''}
+${S.role == 'admin' ? `<a href="#/admin" class="snav ${stfPage == 'admin' ? 'on' : ''}">👥 Users <span class="pendn" id="pendN" ${S.pendingN ? '' : 'hidden'}>${S.pendingN || ''}</span></a>` : ''}
 <span>🆕 Received: ${n(0)}</span><span>👩‍🍳 Preparing: ${n(1)}</span><span>🔔 Ready: ${n(2)}</span><span>✅ Completed: ${n(3)}</span>${themeBtn()}</aside>`;
 };
 const stfTop = () => `<div class="topline">${viewSwitch(stfPage)}${roleBadge()}<button class="btn ol sm" onclick="logout()">Log out</button></div>`;

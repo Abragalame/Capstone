@@ -1,42 +1,55 @@
-# MCPI Canteen – Appwrite deployment guide
+# MCPI Canteen – Appwrite setup guide
 
-Your existing app (ordering, QR tickets, staff dashboard, themes, accessibility) now runs on Appwrite
-with real accounts, roles, 7 stalls and photo uploads. It is a **static site** – no Node build needed.
+A static website (no build step) that runs on **Appwrite**: accounts, roles, orders, menu photos.
 
-## Why you saw HTTP 503
+## Who can use the app
 
-`capstone.sgp.appwrite.run` was an Appwrite **Function** (status "Deployed: Never"). A function with no
-deployment has nothing to serve, so it returns 503. A website must be created under **Sites**, not Functions.
-Node 26 was not the problem. Delete that function and follow section 3.
+| Role | How they get it | What they see |
+|---|---|---|
+| **Student** | Registers → active immediately | Ordering pages (menu, cart, tracking, QR ticket) |
+| **Teacher** | Registers as *Teacher* → **admin approves** | Same ordering pages as students (delivery to their classroom) |
+| **Staff** | Registers as *Staff* → **admin approves** | Staff dashboard: live orders + manage menu, limited to their stall |
+| **Admin** | Only another admin (or you in the Console) can grant it | Everything: Users page, staff dashboard, student view |
 
-## 1. Files (put these at the root of your GitHub repo)
+**Approval flow**
+
+1. A teacher or staff member opens the site → **Register** → picks **Teacher** or **Staff**, fills in their Employee ID.
+2. Their account is created but shows a **"Waiting for admin approval"** page. They cannot order or open the dashboard.
+3. The admin opens **Users → Waiting for approval**, chooses the final role (**Teacher / Staff / Admin**, plus a **stall** for staff) and clicks **Approve** (or **Decline**).
+4. The applicant's waiting page updates by itself within ~15 seconds and sends them to the right page.
+
+Security note: privileges come only from Appwrite **user labels** (`admin`, `staff`, `teacher`, `stall1`…`stall7`). A browser cannot change labels – only the `manage-users` function (admin-only) or the Console can. The "pending" screen is driven by account *prefs*, which only decide what page to show, never what someone is allowed to do.
+
+---
+
+## 1. Project files
 
 ```
-index.html                    page shell (loads css + js in order)
-logo.png, images/             YOUR existing files - keep them
-css/    base.css (your original styles) · components.css · auth.css · student.css · staff.css · admin.css
+index.html
+css/        base · components · auth · student · staff · admin
 js/
-  config.js                   <- edit: Project ID, table/bucket IDs, stall names
-  services/                   all Appwrite calls: auth · menu · orders · storage · admin
-  core/                       state.js (your original state/helpers) · router.js (role-guarded routes)
-  components/                 shared.js · qr-map.js · role-badge.js
-  views/                      auth.welcome · auth.login · student · staff · admin
-  controllers/                auth · student · staff · admin  (button actions)
-  data/sample-menu.js         your original 18 dishes
-  main.js                     start-up
-functions/manage-users/       server function that lets the admin assign staff
+  config.js                  <- you edit this (Project ID etc.)
+  services/                  Appwrite calls: auth · menu · orders · storage · admin
+  views/                     auth.login (register w/ Student/Teacher/Staff) · auth.pending · student · staff · admin
+  controllers/               auth · student · staff · admin
+  core/ components/ data/    router, state, shared UI, sample menu
+functions/manage-users/      server function: approvals, roles, stalls
 ```
 
-Edit `js/config.js` and set `projectId`. The endpoint is already set to `https://sgp.cloud.appwrite.io/v1`
-(taken from your `.sgp.` URL – change it if your project is in another region).
+Push the whole folder to the **root** of a GitHub repo (`main` branch).
 
 ## 2. Appwrite Console setup
 
-**a) Auth** – make sure Email/Password is enabled.
+Create a project at <https://cloud.appwrite.io>. Note its **Project ID** and **region** (the endpoint is
+`https://<region>.cloud.appwrite.io/v1`, e.g. `sgp`, `fra`, `nyc`).
 
-**b) Database** `canteen`
+### a) Auth
+Auth → Settings → make sure **Email/Password** is enabled.
 
-Table `menu_items`
+### b) Database `canteen`
+Databases → Create database. **Database ID must be `canteen`.**
+
+**Table `menu_items`** (ID `menu_items`)
 
 | Column | Type | Notes |
 |---|---|---|
@@ -53,9 +66,10 @@ Table `menu_items`
 | legacyPhoto | varchar 80 | |
 | createdBy | varchar 36 | |
 
-Index: key on `stall`. Permissions: Read = **Any**; Create/Update/Delete = **Label `staff`** and **Label `admin`**.
+- Index: **key** on `stall`.
+- Permissions: Read = **Any**; Create / Update / Delete = **Label `staff`** and **Label `admin`**.
 
-Table `orders`
+**Table `orders`** (ID `orders`)
 
 | Column | Type | Notes |
 |---|---|---|
@@ -71,64 +85,109 @@ Table `orders`
 | notes | text | |
 | st | integer | default 0 |
 | acc | boolean | default false |
+| s1 … s7 | integer ×7 | one column per stall: min -1, max 3, default -1 |
 
-| s1 … s7 | integer ×7 | **one column per stall**, min -1, max 3, default -1 (`s1`, `s2`, `s3`, `s4`, `s5`, `s6`, `s7`) |
+(`s1`–`s7`: -1 = no items from that stall, 0 received, 1 preparing, 2 ready, 3 collected/delivered.)
 
-`s1`–`s7` hold each stall's progress for that order: -1 = no items from that stall, 0 received, 1 preparing, 2 ready, 3 collected/delivered.
-Separate columns mean two stalls can update the same order at the same moment without overwriting each other.
+- Index: **key** on `userId`.
+- Settings: turn **Row security ON**.
+- Table permissions: Create = **Users**; Read + Update = **Label `staff`** and **Label `admin`**.
+  (Each student/teacher automatically gets read/update on their own orders.)
 
-Index: key on `userId`. Settings: turn **Row security ON**. Table permissions: Create = **Users**;
-Read + Update = **Label `staff`** and **Label `admin`**. (Each student gets read/update on their own order automatically.)
+> Teachers need **no extra permissions** – they order like students (role "Users").
 
-**c) Storage** bucket `menu_images`: Read = **Any**; Create/Update/Delete = Label `staff`, Label `admin`;
-allowed extensions jpg, jpeg, png, webp, gif; max 5 MB.
+### c) Storage bucket `menu_images`
+Bucket ID `menu_images`. Read = **Any**; Create / Update / Delete = **Label `staff`**, **Label `admin`**.
+Allowed extensions: jpg, jpeg, png, webp, gif. Max size 5 MB.
 
-**d) Function** `manage-users` (Functions → Create function)
-- Runtime: Node.js 22 (or the newest LTS offered) · Entrypoint `src/main.js` · Build command `npm install`
-- Root directory `functions/manage-users` (connect the same GitHub repo)
-- Execute access: **Users** · Scopes: `users.read`, `users.write`
-- Wait until its deployment shows **Ready**.
+### d) Function `manage-users`  ⚠ must be (re)deployed – it changed
+This function does all admin actions (list users, **approve / decline**, change roles, assign stalls).
 
-## 3. Deploy the website (Sites)
+1. Functions → **Create function** → connect your GitHub repo.
+2. Function ID: **`manage-users`**
+3. Runtime: Node.js (newest LTS offered)
+4. Root directory: `functions/manage-users`
+5. Entrypoint: `src/main.js` · Build command: `npm install`
+6. **Execute access: Users** (the function itself checks that the caller has the `admin` label).
+7. **Scopes:** `users.read`, `users.write`
+8. Deploy and wait until the deployment says **Ready**.
 
-1. Delete the old **Capstone** function.
-2. Console → **Sites → Create site → Connect Git** → pick your Capstone repo and `main` branch.
-3. Framework **Other / static**, build command **empty** (if the form refuses, use `echo done`), output directory `./`.
-4. Deploy and open the site's `*.appwrite.network` domain.
-5. Project → **Overview → Platforms → Add platform → Web** → add that domain (otherwise login shows a CORS error).
+If you already had this function from the older version, just push the new code and **redeploy** – the new
+`approve`, `decline` and `teacher/admin` role actions only exist in the new version. (Old symptom: the Users
+page shows an error or "Unknown action".)
 
-## 4. Make yourself admin
+## 3. Edit `js/config.js`
 
-1. Open the site → **Register** with your email.
-2. Console → Auth → your user → **Labels** → add `admin` → Update. Log out and in again.
-3. You land on the **Admin** page (top-right shows "Admin"). Click **Import sample menu** to load your original dishes.
+```js
+endpoint:  'https://sgp.cloud.appwrite.io/v1',  // match YOUR project's region
+projectId: 'YOUR_PROJECT_ID',
+databaseId: 'canteen',
+tables: { menu: 'menu_items', orders: 'orders' },
+bucketId: 'menu_images',
+functionId: 'manage-users',
+```
+Rename the stalls in the `STALLS` list if you like (keep ids 1–7).
 
-## 4b. Assign staff to stalls
+## 4. Deploy the website (Appwrite Sites)
 
-Admin page → each staff member has a **stall** dropdown (Stall 1–7, or *All stalls* for a supervisor/cashier).
-It adds a label `stall1`…`stall7` to their account. Redeploy the `manage-users` function after updating it (new `setStall` action).
+> A website must be created under **Sites**, not Functions (a Function with no deployment returns HTTP 503).
 
-## 5. How roles work
+1. Console → **Sites → Create site → Connect Git** → pick the repo and `main`.
+2. Framework **Other / static**, build command empty (or `echo done`), output directory `./`.
+3. Deploy and open the `*.appwrite.network` domain.
+4. **Overview → Platforms → Add platform → Web** → add that domain (without it, login fails with a CORS error).
 
-- Every registered account is a **Student** (top-right says "Student").
-- Admin page → **Make staff**. That user's next visit opens the **Staff** dashboard instead, with "Staff" top-right.
-- Staff: **Orders** tab (live, split by stall) and **Manage menu** tab (add / edit / delete dishes, upload a photo).
-  A staff member assigned to a stall only sees that stall's dishes and order items, and can only manage that stall's menu.
-- Roles are Appwrite labels that browsers cannot change; permissions are enforced by Appwrite, not just hidden in the UI.
+## 5. Create the first admin
 
-## Notes
+Nobody can approve anyone until one admin exists, so do this once in the Console:
 
-- The Appwrite SDK loads from jsDelivr at its latest version. Once everything works you can pin it
-  (`https://cdn.jsdelivr.net/npm/appwrite@<version>`) in `index.html`.
-- Appwrite can't limit which fields a student may update on their own order row, so a technically skilled student
-  could edit their own order. For a capstone this is acceptable; to harden it, move order status changes into the function.
-- Your original CSS is kept untouched in `css/base.css` so nothing looks different; new role styles live in their own files.
+1. Open your site → **Register** as **Student** with your own email.
+2. Console → **Auth → Users →** your user → **Labels** → add `admin` → **Update**.
+3. Log out and back in. You land on the **Admin** page.
+4. Click **Import sample menu** to load the 18 original dishes.
 
-## Orders from several stalls
+To make more admins later, use the approval screen (choose **Admin**) – the app asks you to confirm.
+Admins can only be removed in the Console (Auth → user → Labels), which prevents accidental lock-out.
 
-An order is split into one part per stall. Each stall moves only its own part: Received → Preparing → Ready → Handed over.
-- **Pickup:** the QR unlocks as soon as any stall is ready. The student's page lists every stall with its status and
-  which counters to visit; they can collect early or wait and do one trip. They get an on-screen alert when a stall becomes ready.
-- **Delivery:** nothing leaves until every stall is ready; then staff press *Mark as Delivered*.
-- Each stall's card also shows the other stalls' progress, and staff get an alert when another stall finishes its part.
-- Menu limits per stall are enforced in the interface; Appwrite cannot restrict table writes per stall.
+## 6. Test the whole flow (5 minutes)
+
+1. Open the site in a private window → Register → **Teacher** (fill Employee ID, grade, room). You should see **Waiting for admin approval**.
+2. Do it again with another email as **Staff**.
+3. In your normal window (admin) open **Users**. Both appear under **Waiting for approval**.
+4. Approve the teacher as **Teacher**; approve the staff member as **Staff** with **Stall 1**.
+5. Back in the private window the page switches to the right home by itself (or press **Check again**).
+   - Teacher → menu & ordering.
+   - Staff → staff dashboard showing only Stall 1.
+6. Declining shows the applicant "Request declined"; they can still tap **Use a student account instead**.
+
+## 7. Day-to-day admin
+
+- **Users → Waiting for approval**: approve / decline requests. A red number next to **Users** shows how many are waiting.
+- **Users → All users**: change anyone's role (Student / Teacher / Staff / Admin) with the dropdown; staff also get a stall dropdown.
+- Changing a role clears the old stall. Existing admins cannot be edited here.
+- Users see their new role the next time they open or refresh the site.
+
+## 8. How multi-stall orders work (unchanged)
+
+An order is split per stall. Each stall moves only its own part: Received → Preparing → Ready → Handed over.
+Pickup QR unlocks when any stall is ready; delivery waits until all stalls are ready.
+
+## Troubleshooting
+
+| Problem | Fix |
+|---|---|
+| "Setup needed: put your Appwrite Project ID" | Edit `js/config.js` |
+| Login shows a CORS / "origin not allowed" error | Add your site's domain as a **Web platform** (step 4.4) |
+| Users page says *Request failed / Unknown action / Server error* | Redeploy `manage-users` (step 2d); check scopes `users.read` + `users.write` and Execute access = Users |
+| Users page says "Admins only" | Your account is missing the `admin` label (step 5) |
+| Approved person still sees the waiting page | Press **Check again** or log out/in; confirm the Console shows the right label on their user |
+| Staff can't add/edit dishes | Their user needs label `staff`; the `menu_items` table must allow Create/Update/Delete for Label `staff` |
+| Orders don't save | `orders` table: Create = Users and Row security ON; check all 7 `s1…s7` columns exist |
+| HTTP 503 on the site | You deployed a Function instead of a Site (step 4) |
+
+## Known limits
+
+- Appwrite can't restrict which fields a student updates on their own order row, so a technically skilled student could edit their own order. Fine for a capstone; to harden it, move status changes into a function.
+- Per-stall menu limits are enforced in the interface, not by Appwrite.
+- Approval requests are not emailed to the admin – the admin sees them (and the red badge) when they open the site.
+- The Appwrite SDK loads from jsDelivr at its latest version; once everything works, pin a version in `index.html`.

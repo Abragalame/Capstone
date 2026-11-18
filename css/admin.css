@@ -4,3 +4,11 @@
 .urow .ctl{display:flex;align-items:center;gap:10px}
 @media(max-width:520px){.urow .ctl{width:100%;justify-content:space-between}}
 .urow select.in{width:auto;min-height:38px;padding:0 10px}
+
+.reqc{display:flex;flex-direction:column;gap:10px}
+.reqc b,.reqc small{display:block;overflow-wrap:anywhere}
+.reqc .ctl{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.reqc select.in{width:auto;min-height:38px;padding:0 10px}
+.pendn{display:inline-block;min-width:20px;padding:0 6px;border-radius:999px;background:#e8452c;color:#fff;font-size:.75rem;font-weight:800;text-align:center}
+.pendn[hidden]{display:none}
+.reqc small b{display:inline}

@@ -22,4 +22,11 @@ const AdminService = {
   async setRole(userId, role) {
     await this.call({ action: 'setRole', userId, role });
   },
+  /* approve a Teacher / Staff request: role = teacher | staff | admin, stall only matters for staff */
+  async approve(userId, role, stall) {
+    await this.call({ action: 'approve', userId, role, stall: Number(stall) || 0 });
+  },
+  async decline(userId) {
+    await this.call({ action: 'decline', userId });
+  },
 };

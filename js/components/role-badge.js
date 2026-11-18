@@ -1,11 +1,14 @@
 /* The Student / Staff / Admin text shown top-right on every signed-in page. */
-const ROLE_LABEL = { student: 'Student', staff: 'Staff', admin: 'Admin' };
+const ROLE_LABEL = { student: 'Student', teacher: 'Teacher', staff: 'Staff', admin: 'Admin', pending: 'Pending approval' };
 const roleBadge = () => `<span class="rolebadge rb-${S.role}">${ROLE_LABEL[S.role] || 'Student'}</span>`;
-const homeHash = () => (S.role === 'admin' ? '#/admin' : S.role === 'staff' ? '#/staff' : '#/home');
+const homeHash = () => (S.role === 'admin' ? '#/admin' : S.role === 'staff' ? '#/staff' : S.role === 'pending' ? '#/pending' : '#/home');
 
-/* Who may open which page. Student pages: student + admin. Staff page: staff + admin. Admin page: admin only. */
+/* Who may open which page. Student pages (ordering): student + teacher + admin. Staff page: staff + admin.
+   Admin page: admin only. Pending page: accounts waiting for approval (they can open nothing else). */
 const canView = (r) =>
   r === 'guide' ? true :
+  S.role === 'pending' ? r === 'pending' :
+  r === 'pending' ? false :
   r === 'staff' ? S.role !== 'student' :
   r === 'admin' ? S.role === 'admin' :
   S.role !== 'staff'; /* every other page is a student page */

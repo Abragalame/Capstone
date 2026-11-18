@@ -3,6 +3,15 @@ import { Client, Users, Query } from 'node-appwrite';
 // Runs server-side with a dynamic API key (scopes: users.read, users.write).
 // Only callers whose account has the "admin" label may use it.
 const has = (labels, name) => labels.some((l) => l.toLowerCase() === name);
+const ROLE_LABELS = ['staff', 'teacher', 'admin'];
+
+/* Rebuild a label list for a role. Keeps unrelated labels, drops old role/stall labels. */
+const withRole = (labels, role, stall) => {
+  const out = labels.filter((l) => !ROLE_LABELS.includes(l.toLowerCase()) && !/^stall[1-7]$/i.test(l));
+  if (role !== 'student') out.push(role);
+  if (role === 'staff' && stall > 0) out.push('stall' + stall);
+  return out;
+};
 
 export default async ({ req, res, error }) => {
   try {
@@ -23,33 +32,42 @@ export default async ({ req, res, error }) => {
     if (action === 'list') {
       const list = await users.list({ queries: [Query.limit(100), Query.orderDesc('$createdAt')] });
       return res.json({
-        users: list.users.map((u) => ({ id: u.$id, name: u.name, email: u.email, labels: u.labels })),
+        users: list.users.map((u) => ({ id: u.$id, name: u.name, email: u.email, labels: u.labels, prefs: u.prefs ?? {} })),
       });
     }
 
-    if (action === 'setRole') {
-      if (!userId || !['student', 'staff'].includes(role)) {
-        return res.json({ error: 'Invalid request.' }, 400);
-      }
-      const target = await users.get({ userId });
-      if (has(target.labels, 'admin')) return res.json({ error: 'Cannot change an admin.' }, 400);
+    /* everything below changes one other (non-admin) user */
+    if (!userId) return res.json({ error: 'Invalid request.' }, 400);
+    const n = Number(stall ?? 0);
+    if (!Number.isInteger(n) || n < 0 || n > 7) return res.json({ error: 'Invalid request.' }, 400);
+    const target = await users.get({ userId });
+    if (has(target.labels, 'admin')) return res.json({ error: 'Cannot change an admin.' }, 400);
 
-      /* changing role also clears any stall assignment */
-      const labels = target.labels.filter((l) => l.toLowerCase() !== 'staff' && !/^stall[1-7]$/i.test(l));
-      if (role === 'staff') labels.push('staff');
-      await users.updateLabels({ userId, labels });
+    const setApproval = (status) => users.updatePrefs({ userId, prefs: { ...(target.prefs ?? {}), reqStatus: status } });
+
+    if (action === 'setRole') {
+      if (!['student', 'teacher', 'staff', 'admin'].includes(role)) return res.json({ error: 'Invalid request.' }, 400);
+      await users.updateLabels({ userId, labels: withRole(target.labels, role, 0) });
+      await setApproval('approved'); /* also clears a pending / declined request */
+      return res.json({ ok: true });
+    }
+
+    /* approve a Teacher / Staff request: the admin decides the final role (staff, teacher or admin) */
+    if (action === 'approve') {
+      if (!['teacher', 'staff', 'admin'].includes(role)) return res.json({ error: 'Invalid request.' }, 400);
+      await users.updateLabels({ userId, labels: withRole(target.labels, role, role === 'staff' ? n : 0) });
+      await setApproval('approved');
+      return res.json({ ok: true });
+    }
+
+    if (action === 'decline') {
+      await setApproval('declined');
       return res.json({ ok: true });
     }
 
     if (action === 'setStall') {
-      const n = Number(stall);
-      if (!userId || !Number.isInteger(n) || n < 0 || n > 7) return res.json({ error: 'Invalid request.' }, 400);
-      const target = await users.get({ userId });
-      if (has(target.labels, 'admin')) return res.json({ error: 'Cannot change an admin.' }, 400);
       if (!has(target.labels, 'staff')) return res.json({ error: 'Make this user staff first.' }, 400);
-      const labels = target.labels.filter((l) => !/^stall[1-7]$/i.test(l));
-      if (n > 0) labels.push('stall' + n);
-      await users.updateLabels({ userId, labels });
+      await users.updateLabels({ userId, labels: withRole(target.labels, 'staff', n) });
       return res.json({ ok: true });
     }
 

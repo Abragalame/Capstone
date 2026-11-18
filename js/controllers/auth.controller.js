@@ -1,21 +1,56 @@
 /* Login / register / logout and loading everything a signed-in user needs. */
 function setAuthMode(m) { authMode = m; go(); }
 
+/* Switch Student / Teacher / Staff on the register form without losing what was typed. */
+function setRegType(t) {
+  regType = t;
+  document.querySelectorAll('#regT button').forEach((b, i) => b.classList.toggle('on', ['student', 'teacher', 'staff'][i] == t));
+  $('fEmp').hidden = t == 'student';
+  $('fRoom').hidden = t == 'staff';
+  $('fSid').hidden = t != 'student';
+  $('rmNote').textContent = t == 'teacher' ? 'Your classroom, used for delivery.' : 'Your grade and room number are used for classroom delivery.';
+  $('regNote').textContent = REG_NOTE[t];
+  $('authBtn').textContent = t == 'student' ? 'Create account' : 'Request account';
+}
+
 async function applyUser(u) {
   S.user = u.name || u.email; S.uid = u.id; S.email = u.email; S.role = u.role; S.stalls = u.stalls || [];
   const p = u.prefs || {};
+  S.req = p.req || ''; S.reqStatus = p.reqStatus || '';
   if (p.grade) S.grade = +p.grade;
   if (p.rn != null) S.rn = cleanRn(p.rn);
   S.sid = p.sid || S.sid || '';
   syncRoom();
   prefSig = JSON.stringify({ grade: S.grade, rn: S.rn, sid: S.sid });
+  if (u.role === 'pending') { save(); return; } /* nothing to load until approved */
   try { MENU = await MenuService.list(); } catch (e) { toast('Could not load the menu'); }
   Object.keys(S.cart).forEach((i) => { if (!item(i)) delete S.cart[i]; });
   try { S.orders = await OrdersService.listMine(u.id); } catch (e) { S.orders = []; }
-  if (u.role !== 'student') {
+  if (u.role === 'staff' || u.role === 'admin') {
     try { S.allOrders = await OrdersService.listAll(); } catch (e) { S.allOrders = []; }
   }
+  if (u.role === 'admin') AdminController.refreshCount();
   save();
+}
+
+/* Pending accounts: re-read the account; if the admin approved it, open the right home page. */
+async function checkApproval(manual) {
+  try {
+    const u = await AuthService.current();
+    if (!u) return;
+    if (u.role !== 'pending') { await applyUser(u); location.hash = homeHash(); go(); return; }
+    const was = S.reqStatus; S.reqStatus = (u.prefs || {}).reqStatus || '';
+    if (was !== S.reqStatus) go();
+    else if (manual === true) toast('Still waiting for the admin');
+  } catch (e) { if (manual === true) toast('Could not check. Try again.'); }
+}
+
+async function useAsStudent() {
+  try {
+    await AuthService.savePrefs({ req: '', reqStatus: '' });
+    const u = await AuthService.current();
+    await applyUser(u); location.hash = homeHash(); go();
+  } catch (e) { toast(AuthService.friendly(e)); }
 }
 
 async function submitAuth() {
@@ -32,7 +67,17 @@ async function submitAuth() {
   B.disabled = true;
   try {
     if (reg) {
-      await AuthService.register({ name, email, password: pw, prefs: { grade: +$('gr').value, rn: cleanRn($('rm').value), sid: $('sid').value.trim() } });
+      let prefs;
+      if (regType === 'student') {
+        prefs = { grade: +$('gr').value, rn: cleanRn($('rm').value), sid: $('sid').value.trim() };
+      } else {
+        const emp = $('emp').value.trim();
+        if (!emp) { E.textContent = 'Please enter your employee ID.'; B.disabled = false; return; }
+        /* req/reqStatus only SHOW the waiting page. The real role is a label the admin adds. */
+        prefs = { req: regType, reqStatus: 'pending', empId: emp };
+        if (regType === 'teacher') Object.assign(prefs, { grade: +$('gr').value, rn: cleanRn($('rm').value) });
+      }
+      await AuthService.register({ name, email, password: pw, prefs });
     } else {
       await AuthService.login(email, pw);
     }
@@ -48,7 +93,7 @@ async function submitAuth() {
 
 async function logout() {
   try { await AuthService.logout(); } catch (e) { /* already signed out */ }
-  S.user = ''; S.uid = ''; S.email = ''; S.role = 'student'; S.stalls = []; S.cart = {}; S.orders = []; S.allOrders = [];
+  S.user = ''; S.uid = ''; S.email = ''; S.role = 'student'; S.req = ''; S.reqStatus = ''; S.pendingN = 0; S.stalls = []; S.cart = {}; S.orders = []; S.allOrders = [];
   MENU = [];
   save();
   location.hash = '#/';

@@ -12,3 +12,8 @@ textarea.in{resize:vertical}
 .viewbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;padding:8px 16px;background:var(--sf2);border-bottom:1px solid var(--ln);font-size:.875rem;color:var(--hd)}
 .viewsw{display:inline-flex;padding:3px}
 .viewsw button{min-height:34px;padding:0 14px;font-size:.875rem}
+
+.rb-teacher{background:#e4ecff;color:#1d4fb0}
+.rb-pending{background:#ffe3d6;color:#a2420f}
+[data-theme=dark] .rb-teacher{background:#1c2c55;color:#9db9ff}
+[data-theme=dark] .rb-pending{background:#4a2310;color:#ffb48a}

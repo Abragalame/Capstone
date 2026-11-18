@@ -1,14 +1,20 @@
 /* Accounts. Everyone who registers is a student; staff/admin come from Appwrite user labels
    (only the manage-users function or the Console can change labels). */
 const AuthService = {
-  roleFromLabels(labels) {
+  /* Privileges come ONLY from labels (browsers can't change them). prefs only decide whether to show
+     the "waiting for approval" page to someone with no role label yet. */
+  roleFromLabels(labels, prefs) {
     labels = (labels || []).map((l) => String(l).toLowerCase());
-    return labels.includes('admin') ? 'admin' : labels.includes('staff') ? 'staff' : 'student';
+    if (labels.includes('admin')) return 'admin';
+    if (labels.includes('staff')) return 'staff';
+    if (labels.includes('teacher')) return 'teacher';
+    const st = prefs && prefs.reqStatus;
+    return (st === 'pending' || st === 'declined') && prefs.req ? 'pending' : 'student';
   },
   async current() {
     try {
       const u = await AW.account.get();
-      return { id: u.$id, name: u.name, email: u.email, role: this.roleFromLabels(u.labels), prefs: u.prefs || {},
+      return { id: u.$id, name: u.name, email: u.email, role: this.roleFromLabels(u.labels, u.prefs), prefs: u.prefs || {},
         stalls: (u.labels || []).map((l) => /^stall([1-7])$/i.exec(String(l))).filter(Boolean).map((m) => +m[1]) };
     } catch (e) {
       return null;
@@ -22,8 +28,11 @@ const AuthService = {
     await AW.account.createEmailPasswordSession({ email, password });
     await AW.account.updatePrefs({ prefs });
   },
+  /* updatePrefs REPLACES all prefs, so merge with what is stored (keeps the approval request fields). */
   async savePrefs(prefs) {
-    await AW.account.updatePrefs({ prefs });
+    let cur = {};
+    try { cur = (await AW.account.getPrefs()) || {}; } catch (e) { /* ignore */ }
+    await AW.account.updatePrefs({ prefs: { ...cur, ...prefs } });
   },
   async logout() {
     await AW.account.deleteSession({ sessionId: 'current' });
