@@ -12,7 +12,7 @@ const AdminController = {
   requestHtml(u) {
     const p = u.prefs || {}, asked = p.req === 'teacher' ? 'Teacher' : 'Staff', id = esc(u.id);
     return `<div class="c reqc" id="rq-${id}"><div><b>${esc(u.name || '(no name)')}</b><small class="rmark">${esc(u.email)}</small>
-<small class="rmark">Asked to be: <b>${asked}</b>${p.empId ? ' · Employee ID ' + esc(p.empId) : ''}${p.req === 'teacher' && p.rn ? ' · Room ' + esc(p.rn) : ''}</small></div>
+<small class="rmark">Asked to be: <b>${asked}</b>${p.empId ? ' · Employee ID ' + esc(p.empId) : ''}</small></div>
 <div class="ctl"><label class="l" style="margin:0">Give role</label>
 <select class="in sm" id="rr-${id}" aria-label="Role for ${esc(u.name || u.email)}" onchange="AdminController.reqRoleChanged('${id}')">${ROLE_OPTS.slice(1).map(([k, l]) => `<option value="${k}" ${k === p.req ? 'selected' : ''}>${l}</option>`).join('')}</select>
 <span id="rs-${id}" ${p.req === 'staff' ? '' : 'hidden'}>${stallSelect(u.id, 0, `id="rt-${id}"`)}</span></div>

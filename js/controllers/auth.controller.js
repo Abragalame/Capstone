@@ -6,9 +6,8 @@ function setRegType(t) {
   regType = t;
   document.querySelectorAll('#regT button').forEach((b, i) => b.classList.toggle('on', ['student', 'teacher', 'staff'][i] == t));
   $('fEmp').hidden = t == 'student';
-  $('fRoom').hidden = t == 'staff';
+  $('fRoom').hidden = t != 'student';
   $('fSid').hidden = t != 'student';
-  $('rmNote').textContent = t == 'teacher' ? 'Your classroom, used for delivery.' : 'Your grade and room number are used for classroom delivery.';
   $('regNote').textContent = REG_NOTE[t];
   $('authBtn').textContent = t == 'student' ? 'Create account' : 'Request account';
 }
@@ -71,11 +70,10 @@ async function submitAuth() {
       if (regType === 'student') {
         prefs = { grade: +$('gr').value, rn: cleanRn($('rm').value), sid: $('sid').value.trim() };
       } else {
-        const emp = $('emp').value.trim();
-        if (!emp) { E.textContent = 'Please enter your employee ID.'; B.disabled = false; return; }
+        const emp = $('emp').value.trim(); /* optional */
         /* req/reqStatus only SHOW the waiting page. The real role is a label the admin adds. */
-        prefs = { req: regType, reqStatus: 'pending', empId: emp };
-        if (regType === 'teacher') Object.assign(prefs, { grade: +$('gr').value, rn: cleanRn($('rm').value) });
+        prefs = { req: regType, reqStatus: 'pending' };
+        if (emp) prefs.empId = emp;
       }
       await AuthService.register({ name, email, password: pw, prefs });
     } else {
